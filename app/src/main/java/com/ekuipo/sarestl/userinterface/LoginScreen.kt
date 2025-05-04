@@ -90,8 +90,20 @@ fun LoginScreen(navController: NavController) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Image(
-                        painter = painterResource(id = R.drawable.tec),
+                        painter = painterResource(id = R.drawable.tecnm),
                         contentDescription = "Logo Institución",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.tec),
+                        contentDescription = "Logo itl",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.sares),
+                        contentDescription = "Logo sares",
                         modifier = Modifier.size(40.dp)
                     )
                 }
