@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.LoginRequest
@@ -175,6 +177,37 @@ fun LoginScreen(navController: NavController) {
                         color = white,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
+                }
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center
+
+                ) {
+                    TextButton(onClick = {
+                        /* Sin funcionalidad */
+                        navController.navigate("login")
+                    }) {
+                        Text(
+                            text = "Iniciar Sesión",
+                            color = Color(0xFF0000FF),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    TextButton(onClick = { /* Sin funcionalidad */ }) {
+                        Text(
+                            text = "Manual Usuario",
+                            color = Color(0xFF0000FF),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    TextButton(onClick = { /* Sin funcionalidad */ }) {
+                        Text(
+                            text = "¿Olvidaste tu contraseña?",
+                            color = Color(0xFF0000FF),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
         }
