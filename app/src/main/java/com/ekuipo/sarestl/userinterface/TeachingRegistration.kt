@@ -29,7 +29,7 @@ import com.ekuipo.sarestl.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudentRegistration(navController: NavController) {
+fun TeachingRegistration(navController: NavController) {
     // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -105,7 +105,7 @@ fun StudentRegistration(navController: NavController) {
 
                 // Título
                 Text(
-                    text = "Registro de Estudiantes",
+                    text = "Registro de Docentes",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -169,9 +169,9 @@ fun StudentRegistration(navController: NavController) {
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
 
-                // Campo Carrera
+                // Campo Departamento
                 Text(
-                    text = "Carrera:",
+                    text = "Departamento:",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
@@ -188,25 +188,6 @@ fun StudentRegistration(navController: NavController) {
                     singleLine = true
                 )
 
-                // Campo Semestre
-                Text(
-                    text = "Semestre:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(bottom = 4.dp)
-                )
-                OutlinedTextField(
-                    value = semestre,
-                    onValueChange = { semestre = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
 
                 // Campo Teléfono
                 Text(
@@ -395,7 +376,7 @@ fun StudentRegistration(navController: NavController) {
                         )
                     }
 
-                    TextButton(onClick = { /* Sin funcionalidad */ }) {
+                    TextButton(onClick = { navController.navigate("UserManual") }) {
                         Text(
                             text = "Manual Usuario",
                             color = Color(0xFF0000FF),

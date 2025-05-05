@@ -10,7 +10,10 @@ import androidx.navigation.compose.rememberNavController
 import com.ekuipo.sarestl.ui.theme.SaresTLTheme
 import com.ekuipo.sarestl.userinterface.DashboardScreen
 import com.ekuipo.sarestl.userinterface.LoginScreen
-import com.ekuipo.sarestl.userinterface.RegistroEstudiantesScreen
+import com.ekuipo.sarestl.userinterface.StudentRegistration
+import com.ekuipo.sarestl.userinterface.TeachingRegistration
+import com.ekuipo.sarestl.userinterface.UserManual
+import com.ekuipo.sarestl.userinterface.UserType
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,8 +29,19 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(navController)  // Pantalla de login
                     }
                     composable("home") {
-                        //DashboardScreen()  // Pantalla de home
-                        RegistroEstudiantesScreen(navController)
+                        DashboardScreen()  // Pantalla de home
+                    }
+                    composable("StudentRegistration") {
+                        StudentRegistration(navController)
+                    }
+                    composable("TeachingRegistration") {
+                        TeachingRegistration(navController)
+                    }
+                    composable("UserType") {
+                        UserType(navController)
+                    }
+                    composable("UserManual") {
+                        UserManual(navController)
                     }
                 }
             }

@@ -187,26 +187,28 @@ fun LoginScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(12.dp) // Espacio entre los botones
                 ) {
                     TextButton(
-                        onClick = { navController.navigate("login") },
+                        onClick = { navController.navigate("UserType") },
                         modifier = Modifier.fillMaxWidth(), // Hace que el botón ocupe todo el ancho
                         contentPadding = PaddingValues(12.dp)  // Padding dentro del botón para hacerlo más grande
                     ) {
                         Text(
                             text = "Registrarse",
                             color = Color(0xFF0000FF),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
                         )
                     }
 
                     TextButton(
-                        onClick = { /* Sin funcionalidad */ },
+                        onClick = { navController.navigate("UserManual") },
                         modifier = Modifier.fillMaxWidth(), // Hace que el botón ocupe todo el ancho
                         contentPadding = PaddingValues(12.dp)  // Padding dentro del botón para hacerlo más grande
                     ) {
                         Text(
                             text = "Manual Usuario",
                             color = Color(0xFF0000FF),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
                         )
                     }
 
@@ -218,7 +220,8 @@ fun LoginScreen(navController: NavController) {
                         Text(
                             text = "¿Olvidaste tu contraseña?",
                             color = Color(0xFF0000FF),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
