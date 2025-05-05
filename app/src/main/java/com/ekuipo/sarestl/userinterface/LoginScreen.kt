@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -179,29 +180,41 @@ fun LoginScreen(navController: NavController) {
                     )
                 }
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center
-
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp), // Espaciado alrededor de la columna
+                    horizontalAlignment = Alignment.CenterHorizontally, // Centra los botones horizontalmente
+                    verticalArrangement = Arrangement.spacedBy(12.dp) // Espacio entre los botones
                 ) {
-                    TextButton(onClick = {
-                        /* Sin funcionalidad */
-                        navController.navigate("login")
-                    }) {
+                    TextButton(
+                        onClick = { navController.navigate("login") },
+                        modifier = Modifier.fillMaxWidth(), // Hace que el botón ocupe todo el ancho
+                        contentPadding = PaddingValues(12.dp)  // Padding dentro del botón para hacerlo más grande
+                    ) {
                         Text(
-                            text = "Iniciar Sesión",
+                            text = "Registrarse",
                             color = Color(0xFF0000FF),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
 
-                    TextButton(onClick = { /* Sin funcionalidad */ }) {
+                    TextButton(
+                        onClick = { /* Sin funcionalidad */ },
+                        modifier = Modifier.fillMaxWidth(), // Hace que el botón ocupe todo el ancho
+                        contentPadding = PaddingValues(12.dp)  // Padding dentro del botón para hacerlo más grande
+                    ) {
                         Text(
                             text = "Manual Usuario",
                             color = Color(0xFF0000FF),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                    TextButton(onClick = { /* Sin funcionalidad */ }) {
+
+                    TextButton(
+                        onClick = { /* Sin funcionalidad */ },
+                        modifier = Modifier.fillMaxWidth(), // Hace que el botón ocupe todo el ancho
+                        contentPadding = PaddingValues(12.dp)  // Padding dentro del botón para hacerlo más grande
+                    ) {
                         Text(
                             text = "¿Olvidaste tu contraseña?",
                             color = Color(0xFF0000FF),
@@ -209,6 +222,7 @@ fun LoginScreen(navController: NavController) {
                         )
                     }
                 }
+
             }
         }
     }
