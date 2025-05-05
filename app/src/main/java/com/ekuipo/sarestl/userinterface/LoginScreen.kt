@@ -213,7 +213,7 @@ fun LoginScreen(navController: NavController) {
                     }
 
                     TextButton(
-                        onClick = { /* Sin funcionalidad */ },
+                        onClick = { navController.navigate("HistoryScreen") },
                         modifier = Modifier.fillMaxWidth(), // Hace que el botón ocupe todo el ancho
                         contentPadding = PaddingValues(12.dp)  // Padding dentro del botón para hacerlo más grande
                     ) {

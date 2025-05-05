@@ -104,9 +104,11 @@ fun DashboardScreen(navController: NavController) {
                                         onClick = {
                                             expanded = false
                                             when (opcion) {
-                                                "Estudiante" -> navController.navigate("pantallaEstudiante")
-                                                "Docente" -> navController.navigate("pantallaDocente")
-                                                "Administrador" -> navController.navigate("pantallaAdministrador")
+                                                "Pagina principal" -> navController.navigate("home")
+                                                "Credencial Digital" -> navController.navigate("home")
+                                                "Historial de Registros" -> navController.navigate("HistoryScreen")
+                                                "Mi Perfil" -> navController.navigate("home")
+                                                "Cerrar Sesión" -> navController.navigate("home")
                                             }
                                         }
                                     )
@@ -323,7 +325,14 @@ fun DashboardScreen(navController: NavController) {
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+                // Copyright
+                Text(
+                    text = "© SaresTL 2024",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = darkBlue,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
             }
         }
     }
-}

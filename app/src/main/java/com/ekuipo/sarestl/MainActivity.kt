@@ -13,6 +13,7 @@ import com.ekuipo.sarestl.userinterface.AdministratorRegistration
 import com.ekuipo.sarestl.userinterface.CleaningRegistration
 import com.ekuipo.sarestl.userinterface.DashboardScreen
 import com.ekuipo.sarestl.userinterface.GuardRegistration
+import com.ekuipo.sarestl.userinterface.HistoryScreen
 import com.ekuipo.sarestl.userinterface.LoginScreen
 import com.ekuipo.sarestl.userinterface.StudentRegistration
 import com.ekuipo.sarestl.userinterface.TeachingRegistration
@@ -58,6 +59,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("GuardRegistration") {
                         GuardRegistration(navController)
+                    }
+                    composable("HistoryScreen") {
+                        HistoryScreen(navController)
                     }
 
                 }
