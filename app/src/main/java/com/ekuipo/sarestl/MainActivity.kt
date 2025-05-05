@@ -12,9 +12,12 @@ import com.ekuipo.sarestl.userinterface.AdministrativeRegistration
 import com.ekuipo.sarestl.userinterface.AdministratorRegistration
 import com.ekuipo.sarestl.userinterface.CleaningRegistration
 import com.ekuipo.sarestl.userinterface.DashboardScreen
+import com.ekuipo.sarestl.userinterface.DigitalCredential
+import com.ekuipo.sarestl.userinterface.EditProfilen
 import com.ekuipo.sarestl.userinterface.GuardRegistration
 import com.ekuipo.sarestl.userinterface.HistoryScreen
 import com.ekuipo.sarestl.userinterface.LoginScreen
+import com.ekuipo.sarestl.userinterface.NotificationScreen
 import com.ekuipo.sarestl.userinterface.StudentRegistration
 import com.ekuipo.sarestl.userinterface.TeachingRegistration
 import com.ekuipo.sarestl.userinterface.UserManual
@@ -62,6 +65,15 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("HistoryScreen") {
                         HistoryScreen(navController)
+                    }
+                    composable("EditProfile") {
+                        EditProfilen(navController)
+                    }
+                    composable("NotificationScreen") {
+                        NotificationScreen(navController)
+                    }
+                    composable("DigitalCredential") {
+                        DigitalCredential(navController)
                     }
 
                 }

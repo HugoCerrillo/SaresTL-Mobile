@@ -8,13 +8,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,36 +28,33 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 
-// Modelo de datos para los registros
-data class Registro(
-    val clave: String,
-    val nombre: String,
+// Modelo de datos para las notificaciones
+data class Notificacion(
+    val tipo: String,
     val fecha: String,
-    val hora: String,
-    val tipo: String
+    val hora: String
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(navController: NavController) {
-    // Definir los colores que coinciden con la interfaz web
+fun NotificationScreen(navController: NavController) {
+    // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
     val white = Color.White
-    val brightBlue = Color(0xFF0D6EFD)
+    val lightGray = Color(0xFFE9ECEF)
 
-    // Datos de ejemplo para la tabla
-    val registros = listOf(
-        Registro("214890204", "Manuel Smith", "25/03/21", "10:00am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "25/03/21", "14:00pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "26/03/21", "09:45am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "26/03/21", "13:30pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "27/03/21", "10:15am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "27/03/21", "14:30pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "28/03/21", "09:50am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "28/03/21", "14:10pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "29/03/21", "10:05am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "29/03/21", "14:20pm", "Salida")
+    // Datos de ejemplo para las notificaciones
+    val notificaciones = listOf(
+        Notificacion("Entrada registrada", "25/03/21", "10:00am"),
+        Notificacion("Salida registrada", "25/03/21", "14:00pm"),
+        Notificacion("Entrada registrada", "26/03/21", "09:45am"),
+        Notificacion("Salida registrada", "26/03/21", "13:30pm"),
+        Notificacion("Entrada registrada", "27/03/21", "10:15am"),
+        Notificacion("Salida registrada", "27/03/21", "14:30pm"),
+        Notificacion("Entrada registrada", "28/03/21", "09:50am"),
+        Notificacion("Salida registrada", "28/03/21", "14:10pm"),
+        Notificacion("Entrada registrada", "29/03/21", "10:05am")
     )
 
     // Estado para la paginación
@@ -66,8 +62,8 @@ fun HistoryScreen(navController: NavController) {
     val totalPages = 4
     val itemsPerPage = 8
     val startIndex = (currentPage - 1) * itemsPerPage
-    val endIndex = minOf(startIndex + itemsPerPage, registros.size)
-    val currentRegistros = registros.subList(startIndex, endIndex)
+    val endIndex = minOf(startIndex + itemsPerPage, notificaciones.size)
+    val currentNotificaciones = notificaciones.subList(startIndex, endIndex)
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
@@ -181,7 +177,7 @@ fun HistoryScreen(navController: NavController) {
             ) {
                 // Título
                 Text(
-                    text = "HISTORIAL DE REGISTROS",
+                    text = "NOTIFICACIONES",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = darkBlue,
@@ -189,58 +185,15 @@ fun HistoryScreen(navController: NavController) {
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
 
-                // Tabla de registros
-                Card(
+                // Lista de notificaciones
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    colors = CardDefaults.cardColors(containerColor = white),
-                    shape = RoundedCornerShape(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(8.dp)
-                    ) {
-                        // Encabezado de la tabla
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color(0xFFF5F5F5))
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Usuario",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1.5f)
-                            )
-                            Text(
-                                text = "Tipo",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center
-                            )
-                            Text(
-                                text = "Fecha/Hora",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
-                        Divider(color = Color.LightGray, thickness = 1.dp)
-
-                        // Filas de datos
-                        LazyColumn {
-                            items(currentRegistros) { registro ->
-                                RegistroRow(registro)
-                                Divider(color = Color.LightGray, thickness = 0.5.dp)
-                            }
-                        }
+                    items(currentNotificaciones) { notificacion ->
+                        NotificacionItem(notificacion)
                     }
                 }
 
@@ -256,56 +209,53 @@ fun HistoryScreen(navController: NavController) {
                         onClick = {
                             if (currentPage > 1) currentPage--
                         },
-                        enabled = currentPage > 1
+                        enabled = currentPage > 1,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White, CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowLeft,
                             contentDescription = "Anterior",
-                            tint = if (currentPage > 1) brightBlue else Color.Gray
+                            tint = if (currentPage > 1) darkBlue else Color.Gray
                         )
                     }
 
-                    Text(
-                        text = "$currentPage/$totalPages",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .size(40.dp)
+                            .background(Color.White, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$currentPage/$totalPages",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = darkBlue
+                        )
+                    }
 
                     IconButton(
                         onClick = {
                             if (currentPage < totalPages) currentPage++
                         },
-                        enabled = currentPage < totalPages
+                        enabled = currentPage < totalPages,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(Color.White, CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Siguiente",
-                            tint = if (currentPage < totalPages) brightBlue else Color.Gray
+                            tint = if (currentPage < totalPages) darkBlue else Color.Gray
                         )
                     }
                 }
 
-                // Botón Exportar
-                Button(
-                    onClick = { /* Sin funcionalidad */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = brightBlue),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = "Exportar",
-                        color = white,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
                 // Copyright
                 Text(
-                    text = "© SaresTL 2024",
+                    text = "© SaresTL 2025",
                     style = MaterialTheme.typography.bodySmall,
                     color = darkBlue,
                     modifier = Modifier.padding(top = 8.dp)
@@ -316,60 +266,68 @@ fun HistoryScreen(navController: NavController) {
 }
 
 @Composable
-fun RegistroRow(registro: Registro) {
-    Row(
+fun NotificacionItem(notificacion: Notificacion) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE9ECEF)),
+        shape = RoundedCornerShape(24.dp)
     ) {
-        // Columna para Nombre y Clave
-        Column(
+        Row(
             modifier = Modifier
-                .weight(1.5f)
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Tipo de notificación
             Text(
-                text = registro.nombre,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = registro.clave,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
-        }
-
-        // Columna para Tipo
-        Box(
-            modifier = Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = registro.tipo,
-                style = MaterialTheme.typography.bodyMedium,
+                text = notificacion.tipo,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                color = if (registro.tipo == "Entrada") Color(0xFF28A745) else Color(0xFFDC3545),
-                textAlign = TextAlign.Center
+                color = Color.Black
             )
-        }
 
-        // Columna para Fecha/Hora
-        Column(
-            modifier = Modifier
-                .weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+            // Fecha y hora
             Text(
-                text = registro.fecha,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = registro.hora,
-                style = MaterialTheme.typography.bodySmall,
+                text = "${notificacion.fecha} - ${notificacion.hora}",
+                style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
+
+            // Menú de opciones
+            Box {
+                IconButton(
+                    onClick = { showMenu = true },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "Más opciones",
+                        tint = Color.Gray
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Ver detalles") },
+                        onClick = { showMenu = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Marcar como leída") },
+                        onClick = { showMenu = false }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Eliminar") },
+                        onClick = { showMenu = false }
+                    )
+                }
+            }
         }
     }
 }

@@ -119,18 +119,19 @@ fun UserManual(navController: NavController) {
                                 // Cargar el video de YouTube
                                 loadData(
                                     """
-                                    <html>
-                                        <body style="margin:0;padding:0">
-                                            <iframe 
-                                                width="100%" 
-                                                height="100%" 
-                                                src="https://www.youtube.com/watch?v=YclUefDEZBI&ab_channel=HugoEmmanuelCerrilloCano" 
-                                                frameborder="0" 
-                                                allowfullscreen>
-                                            </iframe>
-                                        </body>
-                                    </html>
-                                    """,
+    <html>
+        <body style="margin:0;padding:0">
+            <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/YclUefDEZBI" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </body>
+    </html>
+    """,
                                     "text/html",
                                     "utf-8"
                                 )

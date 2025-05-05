@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -105,10 +106,11 @@ fun DashboardScreen(navController: NavController) {
                                             expanded = false
                                             when (opcion) {
                                                 "Pagina principal" -> navController.navigate("home")
-                                                "Credencial Digital" -> navController.navigate("home")
+                                                "Notificaciones" -> navController.navigate("NotificationScreen")
+                                                "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
-                                                "Mi Perfil" -> navController.navigate("home")
-                                                "Cerrar Sesión" -> navController.navigate("home")
+                                                "Mi Perfil" -> navController.navigate("EditProfile")
+                                                "Cerrar Sesión" -> navController.navigate("LoginScreen")
                                             }
                                         }
                                     )
@@ -130,6 +132,16 @@ fun DashboardScreen(navController: NavController) {
                 .background(lightBlue)
                 .verticalScroll(rememberScrollState())
         ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(16.dp)
+                    .align(Alignment.Center),
+                colors = CardDefaults.cardColors(containerColor = white),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -333,6 +345,7 @@ fun DashboardScreen(navController: NavController) {
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
+        }
             }
         }
     }
