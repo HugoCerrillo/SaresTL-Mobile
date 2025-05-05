@@ -29,7 +29,7 @@ import com.ekuipo.sarestl.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeachingRegistration(navController: NavController) {
+fun AdministratorRegistration(navController: NavController) {
     // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -105,7 +105,7 @@ fun TeachingRegistration(navController: NavController) {
 
                 // Título
                 Text(
-                    text = "Registro de Docentes",
+                    text = "Registro de Administrador",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)

@@ -8,7 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ekuipo.sarestl.ui.theme.SaresTLTheme
+import com.ekuipo.sarestl.userinterface.AdministrativeRegistration
+import com.ekuipo.sarestl.userinterface.AdministratorRegistration
+import com.ekuipo.sarestl.userinterface.CleaningRegistration
 import com.ekuipo.sarestl.userinterface.DashboardScreen
+import com.ekuipo.sarestl.userinterface.GuardRegistration
 import com.ekuipo.sarestl.userinterface.LoginScreen
 import com.ekuipo.sarestl.userinterface.StudentRegistration
 import com.ekuipo.sarestl.userinterface.TeachingRegistration
@@ -29,13 +33,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(navController)  // Pantalla de login
                     }
                     composable("home") {
-                        DashboardScreen()  // Pantalla de home
-                    }
-                    composable("StudentRegistration") {
-                        StudentRegistration(navController)
-                    }
-                    composable("TeachingRegistration") {
-                        TeachingRegistration(navController)
+                        DashboardScreen(navController)  // Pantalla de home
                     }
                     composable("UserType") {
                         UserType(navController)
@@ -43,6 +41,25 @@ class MainActivity : ComponentActivity() {
                     composable("UserManual") {
                         UserManual(navController)
                     }
+                    composable("StudentRegistration") {
+                        StudentRegistration(navController)
+                    }
+                    composable("TeachingRegistration") {
+                        TeachingRegistration(navController)
+                    }
+                    composable("AdministratorRegistration") {
+                        AdministratorRegistration(navController)
+                    }
+                    composable("AdministrativeRegistration") {
+                        AdministrativeRegistration(navController)
+                    }
+                    composable("CleaningRegistration") {
+                        CleaningRegistration(navController)
+                    }
+                    composable("GuardRegistration") {
+                        GuardRegistration(navController)
+                    }
+
                 }
             }
         }

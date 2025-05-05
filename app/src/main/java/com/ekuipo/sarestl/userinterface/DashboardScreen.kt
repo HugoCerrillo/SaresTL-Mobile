@@ -16,15 +16,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(navController: NavController) {
     // Definir los colores que coinciden con la interfaz web
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
     val white = Color.White
+    var expanded by remember { mutableStateOf(false) }
+    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
 
     Scaffold(
         topBar = {
@@ -75,12 +78,40 @@ fun DashboardScreen() {
                             )
                         }
 
-                        IconButton(onClick = { /* Sin funcionalidad */ }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.menu),
-                                contentDescription = "Menú",
-                                modifier = Modifier.size(24.dp)
-                            )
+
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 16.dp),
+                            contentAlignment = Alignment.TopEnd
+                        ) {
+                            IconButton(onClick = { expanded = true }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.menu),
+                                    contentDescription = "Menú",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                            ) {
+                                opciones.forEach { opcion ->
+                                    DropdownMenuItem(
+                                        text = { Text(opcion) },
+                                        onClick = {
+                                            expanded = false
+                                            when (opcion) {
+                                                "Estudiante" -> navController.navigate("pantallaEstudiante")
+                                                "Docente" -> navController.navigate("pantallaDocente")
+                                                "Administrador" -> navController.navigate("pantallaAdministrador")
+                                            }
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
                 },
@@ -112,6 +143,16 @@ fun DashboardScreen() {
                     fontWeight = FontWeight.Bold,
                     color = darkBlue,
                     textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.perfil),
+                    contentDescription = "Perfil",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
