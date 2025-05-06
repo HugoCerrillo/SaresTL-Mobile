@@ -18,6 +18,7 @@ import com.ekuipo.sarestl.userinterface.GuardRegistration
 import com.ekuipo.sarestl.userinterface.HistoryScreen
 import com.ekuipo.sarestl.userinterface.LoginScreen
 import com.ekuipo.sarestl.userinterface.NotificationScreen
+import com.ekuipo.sarestl.userinterface.ResetPassword
 import com.ekuipo.sarestl.userinterface.StudentRegistration
 import com.ekuipo.sarestl.userinterface.TeachingRegistration
 import com.ekuipo.sarestl.userinterface.UserManual
@@ -74,6 +75,9 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("DigitalCredential") {
                         DigitalCredential(navController)
+                    }
+                    composable("ResetPassword") {
+                        ResetPassword(navController)
                     }
 
                 }
