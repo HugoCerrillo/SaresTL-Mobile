@@ -21,7 +21,7 @@ import com.ekuipo.sarestl.userinterface.NotificationScreen
 import com.ekuipo.sarestl.userinterface.ResetPassword
 import com.ekuipo.sarestl.userinterface.StudentRegistration
 import com.ekuipo.sarestl.userinterface.TeachingRegistration
-import com.ekuipo.sarestl.userinterface.UserManual
+//import com.ekuipo.sarestl.userinterface.UserManual
 import com.ekuipo.sarestl.userinterface.UserType
 
 class MainActivity : ComponentActivity() {
@@ -43,9 +43,9 @@ class MainActivity : ComponentActivity() {
                     composable("UserType") {
                         UserType(navController)
                     }
-                    composable("UserManual") {
+                    /*composable("UserManual") {
                         UserManual(navController)
-                    }
+                    }*/
                     composable("StudentRegistration") {
                         StudentRegistration(navController)
                     }

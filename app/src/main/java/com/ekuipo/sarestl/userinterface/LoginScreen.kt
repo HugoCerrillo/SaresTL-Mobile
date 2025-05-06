@@ -1,5 +1,8 @@
 package com.ekuipo.sarestl.userinterface
 
+import android.view.ViewGroup
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,8 +20,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,6 +51,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.LoginRequest
@@ -72,15 +79,16 @@ fun LoginScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Iniciar Sesión", "Manual de usuario", "Citas")
 
-
     //olvide contraeseña
     // Definir los colores que coinciden con la interfaz
     val buttonBlue = Color(0xFF1E88E5)
     val linkBlue = Color(0xFF2196F3)
 
-
     // Estado para el campo de correo electrónico
     var correo by remember { mutableStateOf("") }
+
+    // Scroll state para permitir desplazamiento
+    val scrollState = rememberScrollState()
 
     Box(
         modifier = Modifier
@@ -90,10 +98,12 @@ fun LoginScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState) // Añadido scroll vertical aquí
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(50.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
             // Barra superior con logos institucionales (estilo dashboard)
             Card(
                 modifier = Modifier
@@ -101,95 +111,94 @@ fun LoginScreen(navController: NavController) {
                 colors = CardDefaults.cardColors(containerColor = white),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    // Logos institucionales
+                Column { // Cambiado a Column para mejor organización
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.sep),
-                            contentDescription = "Logo SEP",
-                            modifier = Modifier.height(32.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Image(
-                            painter = painterResource(id = R.drawable.tecnm),
-                            contentDescription = "Logo TECNM",
-                            modifier = Modifier.height(32.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Image(
-                            painter = painterResource(id = R.drawable.tec),
-                            contentDescription = "Logo Campus",
-                            modifier = Modifier.height(32.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Image(
-                            painter = painterResource(id = R.drawable.sares),
-                            contentDescription = "Logo SaresTL",
-                            modifier = Modifier.height(32.dp)
-                        )
+                        // Logos institucionales
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.sep),
+                                contentDescription = "Logo SEP",
+                                modifier = Modifier.height(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Image(
+                                painter = painterResource(id = R.drawable.tecnm),
+                                contentDescription = "Logo TECNM",
+                                modifier = Modifier.height(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Image(
+                                painter = painterResource(id = R.drawable.tec),
+                                contentDescription = "Logo Campus",
+                                modifier = Modifier.height(32.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Image(
+                                painter = painterResource(id = R.drawable.sares),
+                                contentDescription = "Logo SaresTL",
+                                modifier = Modifier.height(32.dp)
+                            )
+                        }
                     }
-                }
 
-
-                // Menú de navegación con pestañas
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    containerColor = white,
-                    contentColor = selectedTabColor,
-                    indicator = { tabPositions ->
-                        Box(
-                            Modifier
-                                .tabIndicatorOffset(tabPositions[selectedTab])
-                                .height(3.dp)
-                                .background(
-                                    color = selectedTabColor,
-                                    shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
-                                )
-                        )
-                    }
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTab == index,
-                            onClick = {
-                                selectedTab = index
-                                when (index) {
-                                    0 -> {} // Ya estamos en login
-                                    1 -> navController.navigate("UserManual")
-                                    2 -> navController.navigate("Citas")
+                    // Menú de navegación con pestañas
+                    TabRow(
+                        selectedTabIndex = selectedTab,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        containerColor = white,
+                        contentColor = selectedTabColor,
+                        indicator = { tabPositions ->
+                            Box(
+                                Modifier
+                                    .tabIndicatorOffset(tabPositions[selectedTab])
+                                    .height(3.dp)
+                                    .background(
+                                        color = selectedTabColor,
+                                        shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
+                                    )
+                            )
+                        }
+                    ) {
+                        tabs.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTab == index,
+                                onClick = {
+                                    selectedTab = index
+                                    when (index) {
+                                        0 -> {} // Ya estamos en login
+                                        //1 -> navController.navigate("UserManual")
+                                        //2 -> navController.navigate("Citas")
+                                    }
+                                },
+                                text = {
+                                    Text(
+                                        text = title,
+                                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (selectedTab == index) selectedTabColor else unselectedTabColor
+                                    )
                                 }
-                            },
-                            text = {
-                                Text(
-                                    text = title,
-                                    fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selectedTab == index) selectedTabColor else unselectedTabColor
-                                )
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Contenido principal (tarjeta de login)
             if (selectedTab == 0) {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(),
+                        .fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = white),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
@@ -207,11 +216,13 @@ fun LoginScreen(navController: NavController) {
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
+
                         Image(
                             painter = painterResource(id = R.drawable.sares),
                             contentDescription = "Logo SaresTL",
                             modifier = Modifier.height(150.dp)
                         )
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         // Campo de usuario
                         OutlinedTextField(
@@ -319,18 +330,139 @@ fun LoginScreen(navController: NavController) {
                         }
                     }
                 }
-            }
-            // Aquí se mostrarían los otros contenidos según la pestaña seleccionada
-            // (Manual de usuario o Citas)
+            } else if (selectedTab == 1) {
+                // ID del video de YouTube
+                val videoId = "YclUefDEZBI"
 
-            Spacer(modifier = Modifier.height(25.dp))
-            // Copyright
-            Text(
-                text = "© SaresTL 2024",
-                style = MaterialTheme.typography.bodySmall,
-                color = darkBlue,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                // Barra superior con logos institucionales (estilo dashboard)
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = white),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+
+
+                    // Contenido principal (Manual de usuario)
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = white),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Título
+                            Text(
+                                text = "Manual de usuario",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(bottom = 24.dp)
+                            )
+
+                            // Reproductor de YouTube
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(16f / 9f)
+                                    .background(Color.Black)
+                            ) {
+                                AndroidView(
+                                    factory = { context ->
+                                        WebView(context).apply {
+                                            layoutParams = ViewGroup.LayoutParams(
+                                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                                ViewGroup.LayoutParams.MATCH_PARENT
+                                            )
+                                            webViewClient = WebViewClient()
+                                            settings.javaScriptEnabled = true
+                                            settings.loadWithOverviewMode = true
+                                            settings.useWideViewPort = true
+
+                                            // Cargar el video de YouTube
+                                            loadData(
+                                                """
+                                <html>
+                                    <body style="margin:0;padding:0">
+                                        <iframe 
+                                            width="100%" 
+                                            height="100%" 
+                                            src="https://www.youtube.com/embed/$videoId" 
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen>
+                                        </iframe>
+                                    </body>
+                                </html>
+                                """,
+                                                "text/html",
+                                                "utf-8"
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            // Información adicional (opcional)
+                            Text(
+                                text = "Este video muestra cómo utilizar todas las funciones de la aplicación SaresTL.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Enlaces adicionales
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                TextButton(
+                                    onClick = { /* Acción para descargar PDF */ }
+                                ) {
+                                    Text(
+                                        text = "Descargar manual en PDF",
+                                        color = linkBlue,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    // Copyright
+                    Text(
+                        text = "© SaresTL 2024",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = darkBlue,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                // Copyright
+                Text(
+                    text = "© SaresTL 2024",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = darkBlue,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }else if (selectedTab == 2){
+                //apartado de citas
+
+            }
         }
     }
 }
