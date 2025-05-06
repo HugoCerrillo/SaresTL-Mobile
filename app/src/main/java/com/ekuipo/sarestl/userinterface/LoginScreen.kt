@@ -1,11 +1,15 @@
 package com.ekuipo.sarestl.userinterface
 
+import android.content.Intent
+import android.net.Uri
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -37,6 +43,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +51,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -460,8 +469,119 @@ fun LoginScreen(navController: NavController) {
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }else if (selectedTab == 2){
-                //apartado de citas
+                // Referencia al contexto actual
+                val context = LocalContext.current
 
+                // URL a abrir
+                val citasUrl = "https://hugocerrillo.github.io/SaresTL/html/Modulo-OlvidarContrasena.html"
+
+                // Estado para controlar si ya se ha abierto el navegador
+                var navegadorAbierto by remember { mutableStateOf(false) }
+
+                // Función para abrir la URL en el navegador
+                val abrirNavegador: () -> Unit = {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(citasUrl))
+                        context.startActivity(intent)
+                        navegadorAbierto = true
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            context,
+                            "No se pudo abrir el navegador",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                // Efecto para abrir el navegador automáticamente cuando se selecciona la pestaña
+                LaunchedEffect(selectedTab) {
+                    if (selectedTab == 2 && !navegadorAbierto) {
+                        abrirNavegador()
+                    }
+                }
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = white),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Título
+                        Text(
+                            text = "Agenda tu cita para acceder al ITL",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+
+                        // Imagen ilustrativa
+                        Image(
+                            painter = painterResource(id = R.drawable.sares),
+                            contentDescription = "Logo SaresTL",
+                            modifier = Modifier.height(100.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Mensaje informativo
+                        Text(
+                            text = "Estás siendo redirigido al sistema de citas en línea...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Indicador de carga
+                        CircularProgressIndicator(
+                            color = selectedTabColor,
+                            modifier = Modifier.size(48.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Botón alternativo por si falla la redirección automática
+                        Button(
+                            onClick = abrirNavegador,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = darkBlue)
+                        ) {
+                            Text(
+                                text = "Abrir sistema de citas",
+                                color = white,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Información adicional
+                        Text(
+                            text = "Si no se abre automáticamente, presiona el botón de arriba.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                // Copyright
+                Text(
+                    text = "© SaresTL 2024",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = darkBlue,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
         }
     }
