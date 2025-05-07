@@ -39,7 +39,19 @@ fun StudentRegistration(navController: NavController) {
     // Estados para los campos del formulario
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
+    //var carrera by remember { mutableStateOf("") }
     var carrera by remember { mutableStateOf("") }
+    var carreraExpanded by remember { mutableStateOf(false) }
+    val carreras = listOf(
+        "Ingeniería en Gestión Empresarial",
+        "Ingeniería Industrial",
+        "Ingeniería en Sistemas Computacionales",
+        "Ingeniería en Tecnologías de la Información y Comunicación",
+        "Ingeniería en Logística",
+        "Ingeniería en Electromecánica",
+        "Ingeniería en Electrónica",
+        "Ingeniería en Mecatrónica"
+    )
     var semestre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var genero by remember { mutableStateOf("") }
@@ -178,15 +190,40 @@ fun StudentRegistration(navController: NavController) {
                         .align(Alignment.Start)
                         .padding(bottom = 4.dp)
                 )
-                OutlinedTextField(
-                    value = carrera,
-                    onValueChange = { carrera = it },
+
+                ExposedDropdownMenuBox(
+                    expanded = carreraExpanded,
+                    onExpandedChange = { carreraExpanded = !carreraExpanded },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true
-                )
+                        .padding(bottom = 8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = carrera.ifEmpty { "Seleccione una opción" },
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = carreraExpanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = carreraExpanded,
+                        onDismissRequest = { carreraExpanded = false }
+                    ) {
+                        carreras.forEach { opcion ->
+                            DropdownMenuItem(
+                                text = { Text(text = opcion) },
+                                onClick = {
+                                    carrera = opcion
+                                    carreraExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
 
                 // Campo Semestre
                 Text(
