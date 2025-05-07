@@ -1,6 +1,7 @@
 package com.ekuipo.sarestl.userinterface
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -26,6 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.LoginResponse
+import com.ekuipo.sarestl.models.RegisterRequest
+import com.ekuipo.sarestl.models.RegisterResponse
+import com.ekuipo.sarestl.network.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +47,6 @@ fun StudentRegistration(navController: NavController) {
     // Estados para los campos del formulario
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
-    //var carrera by remember { mutableStateOf("") }
     var carrera by remember { mutableStateOf("") }
     var carreraExpanded by remember { mutableStateOf(false) }
     val carreras = listOf(
@@ -61,6 +68,8 @@ fun StudentRegistration(navController: NavController) {
     var confirmarContrasena by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val generos = listOf("Masculino", "Femenino")
+
+    var isLoading by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -400,7 +409,63 @@ fun StudentRegistration(navController: NavController) {
 
                 // Botón Crear Cuenta
                 Button(
-                    onClick = { /* Sin funcionalidad */ },
+                    onClick = {
+                    /* Sin funcionalidad */
+                        //codigo para mandar llamar a la APÏ
+                        if (nombre.isNotEmpty() && correo.isNotEmpty() && carrera.isNotEmpty() && semestre.isNotEmpty()&& telefono.isNotEmpty() &&genero.isNotEmpty()&& fechaNacimiento.isNotEmpty() && usuario.isNotEmpty() && contrasena.isNotEmpty() && confirmarContrasena.isNotEmpty()){
+                            if (contrasena == confirmarContrasena){
+                                isLoading = true
+                                val userType: String = "Estudiante"
+                                val empresa: String = "NULO"
+                                val registerRequest = RegisterRequest(nombre, correo, carrera, semestre, telefono, genero, fechaNacimiento, usuario, contrasena, userType, empresa)
+                                RetrofitClient.apiService.register(registerRequest)
+                                    .enqueue(object : Callback<RegisterResponse> {
+                                        override fun onResponse(
+                                            call: Call<RegisterResponse>,
+                                            response: Response<RegisterResponse>
+                                        ) {
+                                            isLoading = false
+                                            if (response.isSuccessful && response.body()?.status == "success"){
+                                                navController.navigate("login")
+                                            }else{
+                                                isLoading = false
+                                                Toast.makeText(
+                                                    navController.context,
+                                                    buildString {
+                                                        append("Ha ocurrido un error: ")
+                                                        append(response.body()?.status)
+                                                    },
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+
+                                        override fun onFailure(
+                                            call: Call<RegisterResponse>,
+                                            t: Throwable
+                                        ) {
+                                            isLoading = false
+                                            Toast.makeText(
+                                                navController.context,
+                                                "Error de conexión: $t",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+
+
+                                    })
+                            }else{
+                                //las constraseñas no coinciden
+                                isLoading = false
+                                Toast.makeText(
+                                    navController.context,
+                                    "Las contraseñas no coinciden",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -408,7 +473,7 @@ fun StudentRegistration(navController: NavController) {
                     shape = RoundedCornerShape(24.dp)
                 ) {
                     Text(
-                        text = "Crear Cuenta",
+                        text = if (isLoading) "Cargando..." else "Crear cuenta",
                         color = white,
                         fontSize = 16.sp
                     )
