@@ -25,6 +25,8 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.LoginRequest
 import com.ekuipo.sarestl.models.LoginResponse
+import com.ekuipo.sarestl.models.ResetPasswordRequest
+import com.ekuipo.sarestl.models.ResetPasswordResponse
 import com.ekuipo.sarestl.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -137,7 +139,45 @@ fun ResetPassword(navController: NavController) {
 
                 // Botón Recuperar Contraseña
                 Button(
-                    onClick = { /* Acción para recuperar contraseña */ },
+                    onClick = {
+                    /* Acción para recuperar contraseña */
+                        if (correo.isNotEmpty()){
+                            val resetPasswordRequest = ResetPasswordRequest(correo)
+                            RetrofitClient.apiService.verifyEmail(resetPasswordRequest)
+                                .enqueue(object : Callback<ResetPasswordResponse>{
+                                    override fun onResponse (
+                                        call: Call<ResetPasswordResponse>,
+                                        response: Response<ResetPasswordResponse>
+                                    ){
+                                        if (response.isSuccessful && response.body()?.status == "success"){
+                                            Toast.makeText(
+                                                navController.context,
+                                                "Se ha enviado un enlace para verificar su contraseña",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            navController.navigate("login")
+                                        }else{
+                                            Toast.makeText(
+                                                navController.context,
+                                                "Ha ocurrido un error al intentar enviar el correo de verificación",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+
+                                    override fun onFailure(
+                                        call: Call<ResetPasswordResponse>,
+                                        t: Throwable
+                                    ) {
+                                        Toast.makeText(
+                                            navController.context,
+                                            "Error de conexión",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                })
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth(0.7f)
                         .height(48.dp),
