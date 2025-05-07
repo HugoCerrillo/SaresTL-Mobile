@@ -34,10 +34,16 @@ import com.ekuipo.sarestl.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.app.AlertDialog
+import android.content.DialogInterface
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContentProviderCompat.requireContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentRegistration(navController: NavController) {
+    val context = LocalContext.current
     // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -334,7 +340,7 @@ fun StudentRegistration(navController: NavController) {
                         .padding(bottom = 8.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
-                    placeholder = { Text("dd/mm/aaaa") },
+                    placeholder = { Text("aaaa/mm/dd") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
@@ -426,7 +432,16 @@ fun StudentRegistration(navController: NavController) {
                                         ) {
                                             isLoading = false
                                             if (response.isSuccessful && response.body()?.status == "success"){
-                                                navController.navigate("login")
+                                                //navController.navigate("login")
+                                                AlertDialog.Builder(context)
+                                                    .setMessage("¡Te has registrado correctamente en el sistema!")
+                                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                                        navController.navigate("login")  // Navegar al destino 'login'
+                                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                    }
+                                                    .create()
+                                                    .show()
                                             }else{
                                                 isLoading = false
                                                 Toast.makeText(
