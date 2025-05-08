@@ -437,7 +437,7 @@ fun StudentRegistration(navController: NavController) {
                                                     .setMessage("¡Te has registrado correctamente en el sistema!")
                                                     .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
                                                     .setPositiveButton("Aceptar") { dialog, _ ->
-                                                        navController.navigate("login")  // Navegar al destino 'login'
+                                                        navController.navigate("login")
                                                         dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
                                                     }
                                                     .create()
@@ -448,7 +448,7 @@ fun StudentRegistration(navController: NavController) {
                                                     .setMessage("Ha ocurrido un error: ${response.body()?.message ?: "Mensaje no disponible"}")
                                                     .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
                                                     .setPositiveButton("Aceptar") { dialog, _ ->
-                                                        navController.navigate("StudentRegistration")  // Navegar al destino 'login'
+                                                        navController.navigate("StudentRegistration")
                                                         dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
                                                     }
                                                     .create()
@@ -465,7 +465,7 @@ fun StudentRegistration(navController: NavController) {
                                                 .setMessage("Error de conexión: " + t.toString())
                                                 .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
                                                 .setPositiveButton("Aceptar") { dialog, _ ->
-                                                    navController.navigate("StudentRegistration")  // Navegar al destino 'login'
+                                                    navController.navigate("StudentRegistration")
                                                     dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
                                                 }
                                                 .create()
@@ -477,11 +477,14 @@ fun StudentRegistration(navController: NavController) {
                             }else{
                                 //las constraseñas no coinciden
                                 isLoading = false
-                                Toast.makeText(
-                                    navController.context,
-                                    "Las contraseñas no coinciden",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                AlertDialog.Builder(context)
+                                    .setMessage("Error: Las contraseñas no coinciden.")
+                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                    }
+                                    .create()
+                                    .show()
                             }
 
                         }
