@@ -444,14 +444,15 @@ fun StudentRegistration(navController: NavController) {
                                                     .show()
                                             }else{
                                                 isLoading = false
-                                                Toast.makeText(
-                                                    navController.context,
-                                                    buildString {
-                                                        append("Ha ocurrido un error: ")
-                                                        append(response.body()?.status)
-                                                    },
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
+                                                AlertDialog.Builder(context)
+                                                    .setMessage("Ha ocurrido un error: ${response.body()?.message ?: "Mensaje no disponible"}")
+                                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                                        navController.navigate("StudentRegistration")  // Navegar al destino 'login'
+                                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                    }
+                                                    .create()
+                                                    .show()
                                             }
                                         }
 
@@ -460,11 +461,15 @@ fun StudentRegistration(navController: NavController) {
                                             t: Throwable
                                         ) {
                                             isLoading = false
-                                            Toast.makeText(
-                                                navController.context,
-                                                "Error de conexión: $t",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            AlertDialog.Builder(context)
+                                                .setMessage("Error de conexión: " + t.toString())
+                                                .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                .setPositiveButton("Aceptar") { dialog, _ ->
+                                                    navController.navigate("StudentRegistration")  // Navegar al destino 'login'
+                                                    dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                }
+                                                .create()
+                                                .show()
                                         }
 
 
