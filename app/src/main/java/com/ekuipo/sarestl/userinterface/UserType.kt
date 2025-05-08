@@ -170,7 +170,7 @@ fun UserType(navController: NavController) {
                             "Administrador" -> navController.navigate("AdministratorRegistration")
                             "Administrativo" -> navController.navigate("AdministrativeRegistration")
                             "Intendente" -> navController.navigate("CleaningRegistration")
-                            "Guardia" -> navController.navigate("GuardRegistratio")
+                            "Guardia" -> navController.navigate("GuardRegistration")
                         }
                     },
                     modifier = Modifier
