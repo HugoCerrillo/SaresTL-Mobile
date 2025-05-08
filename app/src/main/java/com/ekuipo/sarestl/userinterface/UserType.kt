@@ -167,10 +167,10 @@ fun UserType(navController: NavController) {
                         when (tipoUsuario) {
                             "Estudiante" -> navController.navigate("StudentRegistration")
                             "Docente" -> navController.navigate("TeachingRegistration")
-                            //"Administrador" -> navController.navigate("pantallaAdministrador")
-                            //"Administrativo" -> navController.navigate("pantallaAdministrativo")
-                            //"Intendente" -> navController.navigate("pantallaIntendente")
-                            //"Guardia" -> navController.navigate("pantallaGuardia")
+                            "Administrador" -> navController.navigate("AdministratorRegistration")
+                            "Administrativo" -> navController.navigate("AdministrativeRegistration")
+                            "Intendente" -> navController.navigate("CleaningRegistration")
+                            "Guardia" -> navController.navigate("GuardRegistratio")
                         }
                     },
                     modifier = Modifier

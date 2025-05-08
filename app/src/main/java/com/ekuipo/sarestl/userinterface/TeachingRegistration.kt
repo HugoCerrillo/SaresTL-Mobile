@@ -281,7 +281,7 @@ fun TeachingRegistration(navController: NavController) {
                         .padding(bottom = 8.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
-                    placeholder = { Text("aaaa/mm/dd") },
+                    placeholder = { Text("aaaa-mm-dd") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
@@ -429,6 +429,15 @@ fun TeachingRegistration(navController: NavController) {
                                     .show()
                             }
 
+                        }else{
+                            android.app.AlertDialog.Builder(context)
+                                .setMessage("Error: Todos los campos deben ser llenados.")
+                                .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                .setPositiveButton("Aceptar") { dialog, _ ->
+                                    dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                }
+                                .create()
+                                .show()
                         }
                     },
                     modifier = Modifier

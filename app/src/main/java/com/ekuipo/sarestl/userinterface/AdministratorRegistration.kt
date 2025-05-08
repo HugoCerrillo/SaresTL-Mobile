@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,10 +27,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.RegisterRequest
+import com.ekuipo.sarestl.models.RegisterResponse
+import com.ekuipo.sarestl.network.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdministratorRegistration(navController: NavController) {
+    val context = LocalContext.current
+    var isLoading by remember { mutableStateOf(false) }
     // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -39,8 +48,8 @@ fun AdministratorRegistration(navController: NavController) {
     // Estados para los campos del formulario
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
-    var carrera by remember { mutableStateOf("") }
-    var semestre by remember { mutableStateOf("") }
+    var department by remember { mutableStateOf("") }
+    //var semestre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var genero by remember { mutableStateOf("") }
     var fechaNacimiento by remember { mutableStateOf("") }
@@ -179,8 +188,8 @@ fun AdministratorRegistration(navController: NavController) {
                         .padding(bottom = 4.dp)
                 )
                 OutlinedTextField(
-                    value = carrera,
-                    onValueChange = { carrera = it },
+                    value = department,
+                    onValueChange = { department = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
@@ -269,7 +278,7 @@ fun AdministratorRegistration(navController: NavController) {
                         .padding(bottom = 8.dp),
                     shape = RoundedCornerShape(8.dp),
                     singleLine = true,
-                    placeholder = { Text("dd/mm/aaaa") },
+                    placeholder = { Text("aaaa-mm-dd") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
 
@@ -344,7 +353,89 @@ fun AdministratorRegistration(navController: NavController) {
 
                 // Botón Crear Cuenta
                 Button(
-                    onClick = { /* Sin funcionalidad */ },
+                    onClick = {
+                        //codigo para mandar llamar a la APÏ
+                        if (nombre.isNotEmpty() && correo.isNotEmpty() && department.isNotEmpty() && telefono.isNotEmpty() &&genero.isNotEmpty()&& fechaNacimiento.isNotEmpty() && usuario.isNotEmpty() && contrasena.isNotEmpty() && confirmarContrasena.isNotEmpty()){
+                            if (contrasena == confirmarContrasena){
+                                isLoading = true
+                                val userType: String = "Administrador"
+                                val empresa: String = "NULO"
+                                val semester: String = "nulo"
+                                val registerRequest = RegisterRequest(nombre, correo, department, semester, telefono, genero, fechaNacimiento, usuario, contrasena, userType, empresa)
+                                RetrofitClient.apiService.register(registerRequest)
+                                    .enqueue(object : Callback<RegisterResponse> {
+                                        override fun onResponse(
+                                            call: Call<RegisterResponse>,
+                                            response: Response<RegisterResponse>
+                                        ) {
+                                            isLoading = false
+                                            if (response.isSuccessful && response.body()?.status == "success"){
+                                                //navController.navigate("login")
+                                                android.app.AlertDialog.Builder(context)
+                                                    .setMessage("¡Te has registrado correctamente en el sistema!")
+                                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                                        navController.navigate("login")  // Navegar al destino 'login'
+                                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                    }
+                                                    .create()
+                                                    .show()
+                                            }else{
+                                                isLoading = false
+                                                android.app.AlertDialog.Builder(context)
+                                                    .setMessage("Ha ocurrido un error: ${response.body()?.message ?: "Mensaje no disponible"}")
+                                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                                        navController.navigate("AdministratorRegistration")
+                                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                    }
+                                                    .create()
+                                                    .show()
+                                            }
+                                        }
+
+                                        override fun onFailure(
+                                            call: Call<RegisterResponse>,
+                                            t: Throwable
+                                        ) {
+                                            isLoading = false
+                                            android.app.AlertDialog.Builder(context)
+                                                .setMessage("Error de conexión: " + t.toString())
+                                                .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                .setPositiveButton("Aceptar") { dialog, _ ->
+                                                    navController.navigate("AdministratorRegistration")
+                                                    dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                }
+                                                .create()
+                                                .show()
+                                        }
+
+
+                                    })
+                            }else{
+                                //las constraseñas no coinciden
+                                isLoading = false
+                                android.app.AlertDialog.Builder(context)
+                                    .setMessage("Error: Las contraseñas no coinciden.")
+                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                    }
+                                    .create()
+                                    .show()
+                            }
+
+                        }else{
+                            android.app.AlertDialog.Builder(context)
+                                .setMessage("Error: Todos los campos deben ser llenados.")
+                                .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                .setPositiveButton("Aceptar") { dialog, _ ->
+                                    dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                }
+                                .create()
+                                .show()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
