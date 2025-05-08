@@ -1,5 +1,6 @@
 package com.ekuipo.sarestl.userinterface
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,10 +20,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.SessionManager
+import androidx.compose.ui.platform.LocalContext
 
+
+@SuppressLint("RememberReturnType")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavController) {
+
+    // Varuables de session
+
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val clave = remember { sessionManager.getUserKey() }
+    val nombre = remember { sessionManager.getUserName() }
+    val rol = remember { sessionManager.getUserRol() }
+
+
     // Definir los colores que coinciden con la interfaz web
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -152,7 +167,7 @@ fun DashboardScreen(navController: NavController) {
 
                 // Mensaje de bienvenida
                 Text(
-                    text = "Bienvenido (a): Hugo Emmanuel Cerrillo",
+                    text = "Bienvenido (a): $nombre",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = darkBlue,
@@ -173,7 +188,8 @@ fun DashboardScreen(navController: NavController) {
 
                 // Información del usuario
                 Text(
-                    text = "Eres un: Administrador en TECNM Campus León Campus 1",
+                    text = "Tu clave de sesión es: $clave",
+                    //text = "Eres un: Administrador en TECNM Campus León Campus 1",
                     style = MaterialTheme.typography.bodyLarge,
                     color = darkBlue,
                     textAlign = TextAlign.Center
@@ -183,7 +199,7 @@ fun DashboardScreen(navController: NavController) {
 
                 // Rol del usuario
                 Text(
-                    text = "Con rol en nuestro sistema de: Administrador",
+                    text = "Con rol en nuestro sistema de: $rol",
                     style = MaterialTheme.typography.bodyLarge,
                     color = darkBlue,
                     textAlign = TextAlign.Center
