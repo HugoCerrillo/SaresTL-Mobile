@@ -387,7 +387,7 @@ fun TeachingRegistration(navController: NavController) {
                                             }else{
                                                 isLoading = false
                                                 android.app.AlertDialog.Builder(context)
-                                                    .setMessage("Ha ocurrido un error: ${response.body()?.message ?: "Mensaje no disponible"}")
+                                                    .setMessage("Ha ocurrido un error al registrarse, verifica tus datos e intenta nuevamente.")
                                                     .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
                                                     .setPositiveButton("Aceptar") { dialog, _ ->
                                                         navController.navigate("TeachingRegistration")
