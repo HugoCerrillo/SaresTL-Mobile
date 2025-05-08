@@ -65,6 +65,7 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.LoginRequest
 import com.ekuipo.sarestl.models.LoginResponse
+import com.ekuipo.sarestl.models.SessionManager
 import com.ekuipo.sarestl.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -98,6 +99,11 @@ fun LoginScreen(navController: NavController) {
 
     // Scroll state para permitir desplazamiento
     val scrollState = rememberScrollState()
+
+    // Seession Manager(context)
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+
 
     Box(
         modifier = Modifier
@@ -272,11 +278,15 @@ fun LoginScreen(navController: NavController) {
                                                 call: Call<LoginResponse>,
                                                 response: Response<LoginResponse>
                                             ) {
+                                                // aqui lo del seesiion con la vaiable
+
                                                 isLoading = false
                                                 if (response.isSuccessful && response.body()?.status == "success") {
-                                                    navController.navigate("home")  // Navegar a Home si el login es exitoso
                                                     val clave = response.body()?.clave
-
+                                                    if (clave != null) {
+                                                        sessionManager.saveUserKey(clave)
+                                                        navController.navigate("home")
+                                                    }
                                                 } else {
                                                     Toast.makeText(
                                                         navController.context,
