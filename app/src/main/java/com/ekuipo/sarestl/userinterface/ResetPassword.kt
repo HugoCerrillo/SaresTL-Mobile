@@ -1,6 +1,7 @@
 package com.ekuipo.sarestl.userinterface
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,6 +37,7 @@ import retrofit2.Response
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResetPassword(navController: NavController) {
+    val context = LocalContext.current
     // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -143,25 +146,31 @@ fun ResetPassword(navController: NavController) {
                     /* Acción para recuperar contraseña */
                         if (correo.isNotEmpty()){
                             val resetPasswordRequest = ResetPasswordRequest(correo)
-                            RetrofitClient.apiService.verifyEmail(resetPasswordRequest)
+                            RetrofitClient.apiService.resetPassword(resetPasswordRequest)
                                 .enqueue(object : Callback<ResetPasswordResponse>{
                                     override fun onResponse (
                                         call: Call<ResetPasswordResponse>,
                                         response: Response<ResetPasswordResponse>
                                     ){
                                         if (response.isSuccessful && response.body()?.status == "success"){
-                                            Toast.makeText(
-                                                navController.context,
-                                                "Se ha enviado un enlace para verificar su contraseña",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            navController.navigate("login")
+                                            android.app.AlertDialog.Builder(context)
+                                                .setMessage("¡Se ha enviado un enlace para restablecer tu contraseña, verifica tu correo electronico (tambien en spam)!")
+                                                .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                .setPositiveButton("Aceptar") { dialog, _ ->
+                                                    navController.navigate("login")
+                                                    dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                }
+                                                .create()
+                                                .show()
                                         }else{
-                                            Toast.makeText(
-                                                navController.context,
-                                                "Ha ocurrido un error al intentar enviar el correo de verificación",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            android.app.AlertDialog.Builder(context)
+                                                .setMessage("El correo electronico ingresado no coincide con ningun Usuario de SaresTL, intente nuevamente con un correo distinto")
+                                                .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                .setPositiveButton("Aceptar") { dialog, _ ->
+                                                    dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                }
+                                                .create()
+                                                .show()
                                         }
                                     }
 
@@ -169,11 +178,14 @@ fun ResetPassword(navController: NavController) {
                                         call: Call<ResetPasswordResponse>,
                                         t: Throwable
                                     ) {
-                                        Toast.makeText(
-                                            navController.context,
-                                            "Error de conexión",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        android.app.AlertDialog.Builder(context)
+                                            .setMessage("Ha ocurrido un error al contactar con el servidor, intentelo de nuevo mas tarde")
+                                            .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                            .setPositiveButton("Aceptar") { dialog, _ ->
+                                                dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                            }
+                                            .create()
+                                            .show()
                                     }
                                 })
                         }

@@ -14,8 +14,8 @@ interface ApiService {
     @POST("/api/login") // Endpoint de login
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
 
-    @POST("/api/verifyEmail")
-    fun verifyEmail (@Body resetPasswordRequest: ResetPasswordRequest): Call<ResetPasswordResponse>
+    @POST("/api/resetPasswordApp")
+    fun resetPassword (@Body resetPasswordRequest: ResetPasswordRequest): Call<ResetPasswordResponse>
 
     @POST("/api/register")
     fun register (@Body registerRequest: RegisterRequest): Call<RegisterResponse>
