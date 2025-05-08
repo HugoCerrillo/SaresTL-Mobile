@@ -275,6 +275,8 @@ fun LoginScreen(navController: NavController) {
                                                 isLoading = false
                                                 if (response.isSuccessful && response.body()?.status == "success") {
                                                     navController.navigate("home")  // Navegar a Home si el login es exitoso
+                                                    val clave = response.body()?.clave
+
                                                 } else {
                                                     Toast.makeText(
                                                         navController.context,
