@@ -31,6 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.remember
+import com.ekuipo.sarestl.models.SessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +53,12 @@ fun EditProfilen(navController: NavController) {
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val clave = sessionManager.getUserKey()
+
+
 
     Scaffold(
         topBar = {
@@ -195,7 +204,8 @@ fun EditProfilen(navController: NavController) {
                     )
 
                     Text(
-                        text = "214890204",
+                        //text = "214890204",
+                        text = "$clave",
                         style = MaterialTheme.typography.bodyLarge,
                         color = darkBlue
                     )
