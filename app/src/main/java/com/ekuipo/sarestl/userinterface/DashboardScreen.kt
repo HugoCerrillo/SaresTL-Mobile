@@ -34,8 +34,8 @@ fun DashboardScreen(navController: NavController) {
     val context = LocalContext.current
     val sessionManager = remember { SessionManager(context) }
     val clave = remember { sessionManager.getUserKey() }
-    val nombre = remember { sessionManager.getUserName() }
-    val rol = remember { sessionManager.getUserRol() }
+    val name = remember { sessionManager.getUserName() }
+    val userType = remember { sessionManager.getUserRol() }
 
 
     // Definir los colores que coinciden con la interfaz web
@@ -167,7 +167,7 @@ fun DashboardScreen(navController: NavController) {
 
                 // Mensaje de bienvenida
                 Text(
-                    text = "Bienvenido (a): $nombre",
+                    text = "Bienvenido (a): $name",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = darkBlue,
@@ -199,7 +199,7 @@ fun DashboardScreen(navController: NavController) {
 
                 // Rol del usuario
                 Text(
-                    text = "Con rol en nuestro sistema de: $rol",
+                    text = "Con rol en nuestro sistema de: $userType",
                     style = MaterialTheme.typography.bodyLarge,
                     color = darkBlue,
                     textAlign = TextAlign.Center

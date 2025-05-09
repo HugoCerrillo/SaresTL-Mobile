@@ -7,8 +7,8 @@ public class SessionManager {
 
     private SharedPreferences prefs;
     private static final String USER_KEY = "clave";
-    private static final String NAME = "nombre";
-    private static final String ROL = "rol";
+    private static final String NAME = "name";
+    private static final String ROL = "userType";
 
     public SessionManager(Context context) {
         prefs = context.getSharedPreferences("user_session", Context.MODE_PRIVATE);
@@ -22,16 +22,16 @@ public class SessionManager {
         return prefs.getString(USER_KEY, "");
     }
 
-    public void saveUserName(String nombre) {
-        prefs.edit().putString(NAME, nombre).apply();
+    public void saveUserName(String name) {
+        prefs.edit().putString(NAME, name).apply();
     }
 
     public String getUserName() {
         return prefs.getString(NAME, "");
     }
 
-    public void saveUserRol(String rol) {
-        prefs.edit().putString(ROL, rol).apply();
+    public void saveUserRol(String userType) {
+        prefs.edit().putString(ROL, userType).apply();
     }
 
     public String getUserRol() {

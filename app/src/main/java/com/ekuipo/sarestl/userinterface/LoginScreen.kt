@@ -283,8 +283,15 @@ fun LoginScreen(navController: NavController) {
                                                 isLoading = false
                                                 if (response.isSuccessful && response.body()?.status == "success") {
                                                     val clave = response.body()?.clave
+                                                    val name = response.body()?.name
+                                                    val userType = response.body()?.userType
+
+
                                                     if (clave != null) {
                                                         sessionManager.saveUserKey(clave)
+                                                        sessionManager.saveUserName(name)
+                                                        sessionManager.saveUserRol(userType)
+
                                                         navController.navigate("home")
                                                     }
                                                 } else {
