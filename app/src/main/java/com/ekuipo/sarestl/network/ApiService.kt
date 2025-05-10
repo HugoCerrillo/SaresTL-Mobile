@@ -1,11 +1,15 @@
 package com.ekuipo.sarestl.network
 
+import com.ekuipo.sarestl.models.EditProfileRequest
+import com.ekuipo.sarestl.models.EditProfileResponse
 import com.ekuipo.sarestl.models.LoginRequest
 import com.ekuipo.sarestl.models.LoginResponse
 import com.ekuipo.sarestl.models.RegisterRequest
 import com.ekuipo.sarestl.models.RegisterResponse
 import com.ekuipo.sarestl.models.ResetPasswordRequest
 import com.ekuipo.sarestl.models.ResetPasswordResponse
+import com.ekuipo.sarestl.userinterface.EditProfile_getRequest
+import com.ekuipo.sarestl.userinterface.EditProfile_getResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
@@ -19,5 +23,13 @@ interface ApiService {
 
     @POST("/api/register")
     fun register (@Body registerRequest: RegisterRequest): Call<RegisterResponse>
+
+    @POST("/api/editProfile")
+    fun setEditProfile (@Body editProfileRequest: EditProfileRequest): Call<EditProfileResponse>
+
+    @POST("/api/getProfile")
+    fun getEditProfile(@Body setEditProfileRequest: EditProfile_getRequest): Call<EditProfile_getResponse>
+
+
 
 }

@@ -33,7 +33,13 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
+import com.ekuipo.sarestl.models.EditProfileRequest
+import com.ekuipo.sarestl.models.ResetPasswordResponse
 import com.ekuipo.sarestl.models.SessionManager
+import com.ekuipo.sarestl.network.RetrofitClient
+import dalvik.system.ZipPathValidator.Callback
+import retrofit2.Call
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -393,3 +399,79 @@ fun EditProfilen(navController: NavController) {
         }
     }
 }
+
+private class setDataAPI(val username: String, val email: String, val password: String){
+
+    fun callAPI (){
+        //val editProfileRequest = EditProfileRequest(username)
+    }
+}
+
+
+private class getDataAPI(val username: String){
+    var password: String = ""
+    var email: String = ""
+    var nombre_foto: String = ""
+    var tipo_foto: String = ""
+    var ruta_foto: String = ""
+
+    fun callAPI(){
+        val editProfile_getRequest = EditProfile_getRequest(username)
+        RetrofitClient.apiService.getEditProfile(editProfile_getRequest)
+            .enqueue(object : retrofit2.Callback<EditProfile_getResponse> {
+                override fun onResponse(
+                    call: Call<EditProfile_getResponse>,
+                    response: Response<EditProfile_getResponse>
+                ) {
+                    //contenido
+                    if (response.isSuccessful && response.body()?.status == "success"){
+                        //contenido si todo este veri gus
+                        password = response.body()?.password ?: ""
+                        email = response.body()?.email?: ""
+                        nombre_foto = response.body()?.nombre_foto?: ""
+                        tipo_foto = response.body()?.tipo_foto?: ""
+                        ruta_foto = response.body()?.ruta_foto?: ""
+                        //guardamos tofdo el vlas variables globales
+
+                    }else{
+                        //no hacemos nada y queda como ""
+                        password = "Error"
+                        email = "Error"
+                        nombre_foto = "Error"
+                        tipo_foto= "Error"
+                        ruta_foto = "Error"
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<EditProfile_getResponse>,
+                    t: Throwable
+                ){
+                    //contenido
+                    password = "Error"
+                    email = "Error"
+                    nombre_foto = "Error"
+                    tipo_foto= "Error"
+                    ruta_foto = "Error"
+                }
+            })
+    }
+
+
+
+}
+
+public data class EditProfile_getRequest(
+    val username: String,
+)
+
+public data class EditProfile_getResponse(
+    val status: String,
+    val message: String,
+    val clave: String,
+    val password: String,
+    val email: String,
+    val nombre_foto: String,
+    val tipo_foto: String,
+    val ruta_foto: String,
+)
