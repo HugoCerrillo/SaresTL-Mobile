@@ -285,13 +285,18 @@ fun LoginScreen(navController: NavController) {
                                                     val clave = response.body()?.clave
                                                     val name = response.body()?.name
                                                     val userType = response.body()?.userType
+                                                    val correo = response.body()?.correo
+                                                    val telefono = response.body()?.telefono
+                                                    val imagen = response.body()?.imagen
 
 
                                                     if (clave != null) {
                                                         sessionManager.saveUserKey(clave)
                                                         sessionManager.saveUserName(name)
                                                         sessionManager.saveUserRol(userType)
-                                                        sessionManager.saveIsLogged(true)
+                                                        sessionManager.saveUserEmail(correo)
+                                                        sessionManager.saveUserPhone(telefono)
+                                                        sessionManager.saveUserImage(imagen)
 
                                                         navController.navigate("home")
                                                     }

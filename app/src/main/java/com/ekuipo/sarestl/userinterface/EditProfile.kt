@@ -1,8 +1,13 @@
 package com.ekuipo.sarestl.userinterface
 
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,13 +38,17 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
+import coil.compose.rememberAsyncImagePainter
 import com.ekuipo.sarestl.models.EditProfileRequest
 import com.ekuipo.sarestl.models.ResetPasswordResponse
 import com.ekuipo.sarestl.models.SessionManager
 import com.ekuipo.sarestl.network.RetrofitClient
+import com.ekuipo.sarestl.network.subirImagen
 import dalvik.system.ZipPathValidator.Callback
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Response
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +72,31 @@ fun EditProfilen(navController: NavController) {
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
     val clave = sessionManager.getUserKey()
+
+    //para la fotito
+    var imagenUri by remember { mutableStateOf<Uri?>(null) }
+    val scope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imagenUri = uri
+        uri?.let {
+            scope.launch {
+                val archivo = crearArchivoTemporalConNombre(context, it, "$clave.jpg")
+                val subidaExitosa = subirImagen(archivo)
+                Toast.makeText(
+                    context,
+                    if (subidaExitosa) "✅ Imagen subida" else "❌ Falló la subida",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    //para los datos de los campos de texto
+    val getDataAPI = getDataAPI(clave)
+    getDataAPI.callAPI()
 
 
 
@@ -202,7 +236,7 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Usuario",
+                        text = "Clave",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
@@ -332,15 +366,25 @@ fun EditProfilen(navController: NavController) {
                             .size(120.dp)
                             .background(Color.LightGray, RoundedCornerShape(8.dp))
                             .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .clickable { /* Acción para seleccionar foto */ },
+                            .clickable {
+                                launcher.launch("image/*")
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Añadir foto",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(32.dp)
-                        )
+                        if (imagenUri != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(imagenUri),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Añadir foto",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
                 }
 
@@ -400,7 +444,22 @@ fun EditProfilen(navController: NavController) {
     }
 }
 
-private class setDataAPI(val username: String, val email: String, val password: String){
+
+
+fun crearArchivoTemporalConNombre(context: Context, uri: Uri, nombre: String): File {
+    val inputStream = context.contentResolver.openInputStream(uri)!!
+    val archivoTemporal = File(context.cacheDir, nombre)
+
+    inputStream.use { input ->
+        archivoTemporal.outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
+
+    return archivoTemporal
+}
+
+private class setDataAPI(val username: String, val phoneNumber: String, val password: String){
 
     fun callAPI (){
         //val editProfileRequest = EditProfileRequest(username)
@@ -409,11 +468,11 @@ private class setDataAPI(val username: String, val email: String, val password: 
 
 
 private class getDataAPI(val username: String){
-    var password: String = ""
-    var email: String = ""
-    var nombre_foto: String = ""
-    var tipo_foto: String = ""
-    var ruta_foto: String = ""
+    private var password: String = ""
+    private var phoneNumber: String = ""
+    private var nombre_foto: String = ""
+    private var tipo_foto: String = ""
+    private var ruta_foto: String = ""
 
     fun callAPI(){
         val editProfile_getRequest = EditProfile_getRequest(username)
@@ -427,7 +486,7 @@ private class getDataAPI(val username: String){
                     if (response.isSuccessful && response.body()?.status == "success"){
                         //contenido si todo este veri gus
                         password = response.body()?.password ?: ""
-                        email = response.body()?.email?: ""
+                        phoneNumber = response.body()?.phoneNumber?: ""
                         nombre_foto = response.body()?.nombre_foto?: ""
                         tipo_foto = response.body()?.tipo_foto?: ""
                         ruta_foto = response.body()?.ruta_foto?: ""
@@ -436,7 +495,7 @@ private class getDataAPI(val username: String){
                     }else{
                         //no hacemos nada y queda como ""
                         password = "Error"
-                        email = "Error"
+                        phoneNumber = "Error"
                         nombre_foto = "Error"
                         tipo_foto= "Error"
                         ruta_foto = "Error"
@@ -449,7 +508,7 @@ private class getDataAPI(val username: String){
                 ){
                     //contenido
                     password = "Error"
-                    email = "Error"
+                    phoneNumber = "Error"
                     nombre_foto = "Error"
                     tipo_foto= "Error"
                     ruta_foto = "Error"
@@ -457,6 +516,21 @@ private class getDataAPI(val username: String){
             })
     }
 
+    fun getPassword(): String {
+        return password
+    }
+    fun getPhoneNumber (): String{
+        return phoneNumber
+    }
+    fun getNombre_foto():String{
+        return nombre_foto
+    }
+    fun getTipo_Foto ():String{
+        return tipo_foto
+    }
+    fun getRuta_Foto():String{
+        return ruta_foto
+    }
 
 
 }
@@ -470,7 +544,7 @@ public data class EditProfile_getResponse(
     val message: String,
     val clave: String,
     val password: String,
-    val email: String,
+    val phoneNumber: String,
     val nombre_foto: String,
     val tipo_foto: String,
     val ruta_foto: String,

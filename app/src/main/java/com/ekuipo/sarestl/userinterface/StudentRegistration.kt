@@ -38,12 +38,12 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContentProviderCompat.requireContext
+import com.ekuipo.sarestl.models.SessionManager
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentRegistration(navController: NavController) {
-    val context = LocalContext.current
     // Definir los colores que coinciden con la interfaz
     val lightBlue = Color(0xFF70A5F9)
     val darkBlue = Color(0xFF2D3748)
@@ -76,6 +76,9 @@ fun StudentRegistration(navController: NavController) {
     val generos = listOf("Masculino", "Femenino")
 
     var isLoading by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
 
     Box(
         modifier = Modifier
@@ -431,7 +434,9 @@ fun StudentRegistration(navController: NavController) {
                                             response: Response<RegisterResponse>
                                         ) {
                                             isLoading = false
+
                                             if (response.isSuccessful && response.body()?.status == "success"){
+
                                                 //navController.navigate("login")
                                                 AlertDialog.Builder(context)
                                                     .setMessage("¡Te has registrado correctamente en el sistema!")
