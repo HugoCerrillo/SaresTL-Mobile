@@ -10,7 +10,7 @@ public class SessionManager {
     private static final String NAME = "name";
     private static final String ROL = "userType";
 
-    private static final String IS_LOGGED = "is_logged"; // clave como string
+    private static final String IS_LOGGED = "is_logged";
 
     public SessionManager(Context context) {
         prefs = context.getSharedPreferences("user_session", Context.MODE_PRIVATE);

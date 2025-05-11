@@ -1,6 +1,7 @@
 package com.ekuipo.sarestl
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         val sessionManager = SessionManager(this)
         val isLogged = sessionManager.getIsLogged()
+        Log.d("MyTag", "The value of isLogged is: $isLogged")
         setContent {
             SaresTLTheme {
                 //main content
@@ -39,9 +41,10 @@ class MainActivity : ComponentActivity() {
                 NavHost(navController = navController, startDestination = if (isLogged) "home" else "login"){
 
                     composable("login") {
-                        sessionManager.saveIsLogged(true)
-                        navController.navigate("home") {
-                            popUpTo("login") { inclusive = true }
+                        if(isLogged){
+
+                        }else{
+                            LoginScreen(navController)
                         }
                     }
                     composable("home") {

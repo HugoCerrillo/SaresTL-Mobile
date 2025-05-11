@@ -47,6 +47,8 @@ fun DashboardScreen(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
 
+    Log.d("MyTag", "The value of isLogged is: $isLogged")
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -123,7 +125,10 @@ fun DashboardScreen(navController: NavController) {
                                             expanded = false
                                             when (opcion) {
                                                 "Pagina principal" -> navController.navigate("home")
-                                                "Notificaciones" -> navController.navigate("NotificationScreen")
+                                                "Notificaciones" ->{
+                                                    Log.d("DashboardScreen", "Se ha hecho clic en 'Cerrar Sesión'")
+                                                    navController.navigate("NotificationScreen")
+                                                }
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
