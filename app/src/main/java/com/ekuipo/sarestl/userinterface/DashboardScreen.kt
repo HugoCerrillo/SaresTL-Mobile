@@ -1,6 +1,8 @@
 package com.ekuipo.sarestl.userinterface
 
 import android.annotation.SuppressLint
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -36,7 +38,7 @@ fun DashboardScreen(navController: NavController) {
     val clave = remember { sessionManager.getUserKey() }
     val name = remember { sessionManager.getUserName() }
     val userType = remember { sessionManager.getUserRol() }
-
+    val isLogged = remember { sessionManager.getIsLogged() }
 
     // Definir los colores que coinciden con la interfaz web
     val lightBlue = Color(0xFF70A5F9)
@@ -125,7 +127,15 @@ fun DashboardScreen(navController: NavController) {
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
-                                                "Cerrar Sesión" -> navController.navigate("LoginScreen")
+                                                "Cerrar Sesión" -> {
+                                                    Log.d("DashboardScreen", "Se ha hecho clic en 'Cerrar Sesión'") //
+                                                    sessionManager.clearSession()
+                                                    Log.d("SessionManager", "Sesión eliminada: ${sessionManager.getUserKey() == null}")
+                                                    Toast.makeText(context, "Sesión cerrada", Toast.LENGTH_SHORT).show()
+                                                    navController.navigate("login") {
+                                                        popUpTo(0) { inclusive = true }
+                                                    }
+                                                }
                                             }
                                         }
                                     )
