@@ -373,6 +373,7 @@ fun EditProfilen(navController: NavController) {
                             .clickable { /* Acción para seleccionar foto */ },
                         contentAlignment = Alignment.Center
                     ) {
+
                         if (url != null) {
                             AsyncImage(
                                 model = "$url$clave.jpg",
