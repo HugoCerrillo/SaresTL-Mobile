@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.SessionManager
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +44,8 @@ fun DigitalCredential(navController: NavController) {
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
     val clave = sessionManager.getUserKey()
+    val name = remember { sessionManager.getUserName() }
+    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
     Scaffold(
         topBar = {
@@ -182,19 +185,30 @@ fun DigitalCredential(navController: NavController) {
                                     .padding(4.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.perfil),
-                                    contentDescription = "Foto de perfil",
-                                    tint = Color.Gray,
-                                    modifier = Modifier.size(80.dp)
-                                )
+                                if (url != null) {
+                                    AsyncImage(
+                                        model = "$url$clave.jpg",
+                                        contentDescription = "Foto de perfil",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(8.dp)),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.perfil),
+                                        contentDescription = "Foto de perfil",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(80.dp)
+                                    )
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
                             // Nombre
                             Text(
-                                text = "Joseph Alexander Martínez Cortés",
+                                text = "$name",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = white,
