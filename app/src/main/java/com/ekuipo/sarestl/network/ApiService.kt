@@ -10,9 +10,19 @@ import com.ekuipo.sarestl.models.ResetPasswordRequest
 import com.ekuipo.sarestl.models.ResetPasswordResponse
 import com.ekuipo.sarestl.userinterface.EditProfile_getRequest
 import com.ekuipo.sarestl.userinterface.EditProfile_getResponse
+import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
+import java.io.File
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 
 interface ApiService {
     @POST("/api/login") // Endpoint de login
@@ -30,6 +40,25 @@ interface ApiService {
     @POST("/api/getProfile")
     fun getEditProfile(@Body setEditProfileRequest: EditProfile_getRequest): Call<EditProfile_getResponse>
 
+    @Multipart
+    @POST("/upload/")
+    suspend fun subirImagen(@Part image: MultipartBody.Part): Response<ResponseBody>
+}
 
+suspend fun subirImagen(file: File): Boolean {
+    val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+    val multipartBody = MultipartBody.Part.createFormData("image", file.name, requestBody)
 
+    val retrofit = Retrofit.Builder()
+        .baseUrl("https://HugoC.pythonanywhere.com") // Cambia esto
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val api = retrofit.create(ApiService::class.java)
+    return try {
+        val response = api.subirImagen(multipartBody)
+        response.isSuccessful
+    } catch (e: Exception) {
+        false
+    }
 }

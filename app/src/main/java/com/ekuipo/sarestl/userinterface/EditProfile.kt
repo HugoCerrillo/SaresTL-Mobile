@@ -1,8 +1,13 @@
 package com.ekuipo.sarestl.userinterface
 
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,15 +38,17 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
+import coil.compose.rememberAsyncImagePainter
 import com.ekuipo.sarestl.models.EditProfileRequest
 import com.ekuipo.sarestl.models.ResetPasswordResponse
 import com.ekuipo.sarestl.models.SessionManager
 import com.ekuipo.sarestl.network.RetrofitClient
+import com.ekuipo.sarestl.network.subirImagen
 import dalvik.system.ZipPathValidator.Callback
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Response
-import coil.compose.AsyncImage
-
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,10 +61,9 @@ fun EditProfilen(navController: NavController) {
     val gray = Color(0xFFADB5BD)
 
     // Estados para los campos del formulario
-    //var correo by remember { mutableStateOf("usuario@tecnm.mx") }
+    var correo by remember { mutableStateOf("usuario@tecnm.mx") }
     var contrasena by remember { mutableStateOf("") }
     var confirmarContrasena by remember { mutableStateOf("") }
-    //var telefono by remember { mutableStateOf("") }
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
@@ -66,10 +72,33 @@ fun EditProfilen(navController: NavController) {
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
     val clave = sessionManager.getUserKey()
-    var correo = sessionManager.getUserEmail();
-    var telefono by remember { mutableStateOf(sessionManager.getUserPhone() ?: "") }
 
-    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
+    //para la fotito
+    var imagenUri by remember { mutableStateOf<Uri?>(null) }
+    val scope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imagenUri = uri
+        uri?.let {
+            scope.launch {
+                val archivo = crearArchivoTemporalConNombre(context, it, "$clave.jpg")
+                val subidaExitosa = subirImagen(archivo)
+                Toast.makeText(
+                    context,
+                    if (subidaExitosa) "✅ Imagen subida" else "❌ Falló la subida",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    //para los datos de los campos de texto
+    val getDataAPI = getDataAPI(clave)
+    getDataAPI.callAPI()
+
+
 
     Scaffold(
         topBar = {
@@ -207,7 +236,7 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Usuario",
+                        text = "Clave",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
@@ -230,28 +259,26 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Correo",
+                        text = "Correo electrónico",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
                         modifier = Modifier.width(160.dp)
                     )
 
-                    Text (
-                        text = "$correo",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = darkBlue,
-                        //onValueChange = { correo = it },
-                        //modifier = Modifier.fillMaxWidth(),
-                        //shape = RoundedCornerShape(4.dp),
-                        //colors = OutlinedTextFieldDefaults.colors(
-                            //unfocusedBorderColor = Color.LightGray,
-                            //focusedBorderColor = brightBlue,
-                            //unfocusedContainerColor = white,
-                            //focusedContainerColor = white
-                        //),
-                        //singleLine = true,
-                        //keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    OutlinedTextField(
+                        value = correo,
+                        onValueChange = { correo = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.LightGray,
+                            focusedBorderColor = brightBlue,
+                            unfocusedContainerColor = white,
+                            focusedContainerColor = white
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                     )
                 }
 
@@ -319,37 +346,6 @@ fun EditProfilen(navController: NavController) {
                     )
                 }
 
-                // telefono
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Teléfono",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = darkBlue,
-                        modifier = Modifier.width(160.dp)
-                    )
-
-                    OutlinedTextField(
-                        value = telefono,
-                        onValueChange = { telefono = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(4.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.LightGray,
-                            focusedBorderColor = brightBlue,
-                            unfocusedContainerColor = white,
-                            focusedContainerColor = white
-                        ),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                    )
-                }
-
                 // Sección de fotografía
                 Row(
                     modifier = Modifier
@@ -358,7 +354,7 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = "Foto: ",
+                        text = "Fotografía",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
@@ -370,18 +366,16 @@ fun EditProfilen(navController: NavController) {
                             .size(120.dp)
                             .background(Color.LightGray, RoundedCornerShape(8.dp))
                             .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
-                            .clickable { /* Acción para seleccionar foto */ },
+                            .clickable {
+                                launcher.launch("image/*")
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-
-                        if (url != null) {
-                            AsyncImage(
-                                model = "$url$clave.jpg",
-                                contentDescription = "Foto de perfil",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Crop
+                        if (imagenUri != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(imagenUri),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize()
                             )
                         } else {
                             Icon(
@@ -452,7 +446,20 @@ fun EditProfilen(navController: NavController) {
 
 
 
-private class setDataAPI(val username: String, val email: String, val password: String){
+fun crearArchivoTemporalConNombre(context: Context, uri: Uri, nombre: String): File {
+    val inputStream = context.contentResolver.openInputStream(uri)!!
+    val archivoTemporal = File(context.cacheDir, nombre)
+
+    inputStream.use { input ->
+        archivoTemporal.outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
+
+    return archivoTemporal
+}
+
+private class setDataAPI(val username: String, val phoneNumber: String, val password: String){
 
     fun callAPI (){
         //val editProfileRequest = EditProfileRequest(username)
@@ -461,11 +468,11 @@ private class setDataAPI(val username: String, val email: String, val password: 
 
 
 private class getDataAPI(val username: String){
-    var password: String = ""
-    var email: String = ""
-    var nombre_foto: String = ""
-    var tipo_foto: String = ""
-    var ruta_foto: String = ""
+    private var password: String = ""
+    private var phoneNumber: String = ""
+    private var nombre_foto: String = ""
+    private var tipo_foto: String = ""
+    private var ruta_foto: String = ""
 
     fun callAPI(){
         val editProfile_getRequest = EditProfile_getRequest(username)
@@ -479,7 +486,7 @@ private class getDataAPI(val username: String){
                     if (response.isSuccessful && response.body()?.status == "success"){
                         //contenido si todo este veri gus
                         password = response.body()?.password ?: ""
-                        email = response.body()?.email?: ""
+                        phoneNumber = response.body()?.phoneNumber?: ""
                         nombre_foto = response.body()?.nombre_foto?: ""
                         tipo_foto = response.body()?.tipo_foto?: ""
                         ruta_foto = response.body()?.ruta_foto?: ""
@@ -488,7 +495,7 @@ private class getDataAPI(val username: String){
                     }else{
                         //no hacemos nada y queda como ""
                         password = "Error"
-                        email = "Error"
+                        phoneNumber = "Error"
                         nombre_foto = "Error"
                         tipo_foto= "Error"
                         ruta_foto = "Error"
@@ -501,7 +508,7 @@ private class getDataAPI(val username: String){
                 ){
                     //contenido
                     password = "Error"
-                    email = "Error"
+                    phoneNumber = "Error"
                     nombre_foto = "Error"
                     tipo_foto= "Error"
                     ruta_foto = "Error"
@@ -509,6 +516,21 @@ private class getDataAPI(val username: String){
             })
     }
 
+    fun getPassword(): String {
+        return password
+    }
+    fun getPhoneNumber (): String{
+        return phoneNumber
+    }
+    fun getNombre_foto():String{
+        return nombre_foto
+    }
+    fun getTipo_Foto ():String{
+        return tipo_foto
+    }
+    fun getRuta_Foto():String{
+        return ruta_foto
+    }
 
 
 }
@@ -522,7 +544,7 @@ public data class EditProfile_getResponse(
     val message: String,
     val clave: String,
     val password: String,
-    val email: String,
+    val phoneNumber: String,
     val nombre_foto: String,
     val tipo_foto: String,
     val ruta_foto: String,
