@@ -291,6 +291,7 @@ fun LoginScreen(navController: NavController) {
                                                         sessionManager.saveUserKey(clave)
                                                         sessionManager.saveUserName(name)
                                                         sessionManager.saveUserRol(userType)
+                                                        sessionManager.saveIsLogged(true)
 
                                                         navController.navigate("home")
                                                     }

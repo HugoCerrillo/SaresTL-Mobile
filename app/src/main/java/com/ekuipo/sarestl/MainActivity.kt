@@ -23,19 +23,26 @@ import com.ekuipo.sarestl.userinterface.StudentRegistration
 import com.ekuipo.sarestl.userinterface.TeachingRegistration
 //import com.ekuipo.sarestl.userinterface.UserManual
 import com.ekuipo.sarestl.userinterface.UserType
+import com.ekuipo.sarestl.models.SessionManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val sessionManager = SessionManager(this)
+        val isLogged = sessionManager.getIsLogged()
         setContent {
             SaresTLTheme {
                 //main content
                 // Asegúrate de tener un NavController para la navegación
                 val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "login") {
+                NavHost(navController = navController, startDestination = if (isLogged) "home" else "login"){
+
                     composable("login") {
-                        LoginScreen(navController)  // Pantalla de login
+                        sessionManager.saveIsLogged(true)
+                        navController.navigate("home") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     }
                     composable("home") {
                         DashboardScreen(navController)  // Pantalla de home
