@@ -40,6 +40,8 @@ import com.ekuipo.sarestl.network.RetrofitClient
 import dalvik.system.ZipPathValidator.Callback
 import retrofit2.Call
 import retrofit2.Response
+import coil.compose.AsyncImage
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,9 +54,10 @@ fun EditProfilen(navController: NavController) {
     val gray = Color(0xFFADB5BD)
 
     // Estados para los campos del formulario
-    var correo by remember { mutableStateOf("usuario@tecnm.mx") }
+    //var correo by remember { mutableStateOf("usuario@tecnm.mx") }
     var contrasena by remember { mutableStateOf("") }
     var confirmarContrasena by remember { mutableStateOf("") }
+    //var telefono by remember { mutableStateOf("") }
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
@@ -63,8 +66,10 @@ fun EditProfilen(navController: NavController) {
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
     val clave = sessionManager.getUserKey()
+    var correo = sessionManager.getUserEmail();
+    var telefono by remember { mutableStateOf(sessionManager.getUserPhone() ?: "") }
 
-
+    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
     Scaffold(
         topBar = {
@@ -225,26 +230,28 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Correo electrónico",
+                        text = "Correo",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
                         modifier = Modifier.width(160.dp)
                     )
 
-                    OutlinedTextField(
-                        value = correo,
-                        onValueChange = { correo = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(4.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.LightGray,
-                            focusedBorderColor = brightBlue,
-                            unfocusedContainerColor = white,
-                            focusedContainerColor = white
-                        ),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    Text (
+                        text = "$correo",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = darkBlue,
+                        //onValueChange = { correo = it },
+                        //modifier = Modifier.fillMaxWidth(),
+                        //shape = RoundedCornerShape(4.dp),
+                        //colors = OutlinedTextFieldDefaults.colors(
+                            //unfocusedBorderColor = Color.LightGray,
+                            //focusedBorderColor = brightBlue,
+                            //unfocusedContainerColor = white,
+                            //focusedContainerColor = white
+                        //),
+                        //singleLine = true,
+                        //keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                     )
                 }
 
@@ -312,6 +319,37 @@ fun EditProfilen(navController: NavController) {
                     )
                 }
 
+                // telefono
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Teléfono",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = darkBlue,
+                        modifier = Modifier.width(160.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = telefono,
+                        onValueChange = { telefono = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.LightGray,
+                            focusedBorderColor = brightBlue,
+                            unfocusedContainerColor = white,
+                            focusedContainerColor = white
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    )
+                }
+
                 // Sección de fotografía
                 Row(
                     modifier = Modifier
@@ -320,7 +358,7 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = "Fotografía",
+                        text = "Foto: ",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
@@ -335,12 +373,23 @@ fun EditProfilen(navController: NavController) {
                             .clickable { /* Acción para seleccionar foto */ },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Añadir foto",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(32.dp)
-                        )
+                        if (url != null) {
+                            AsyncImage(
+                                model = "$url$clave.jpg",
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Añadir foto",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
                 }
 
@@ -399,6 +448,8 @@ fun EditProfilen(navController: NavController) {
         }
     }
 }
+
+
 
 private class setDataAPI(val username: String, val email: String, val password: String){
 

@@ -2,7 +2,8 @@ package com.ekuipo.sarestl.models
 
 data class EditProfileRequest(
     val username: String,
-    val email: String,
+    val correo: String,
     val password: String,
-    //faltaria lo de la foto
+    val telefono: String,
+    val imagen: String
 )

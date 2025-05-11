@@ -6,4 +6,7 @@ data class LoginResponse(
     val clave: String,
     val name: String,
     val userType: String,
+    val correo: String,
+    val telefono: String,
+    val imagen: String,
 )

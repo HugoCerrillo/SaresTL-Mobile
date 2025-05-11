@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.SessionManager
 
 // Modelo de datos para los registros
 data class Registro(
@@ -47,18 +49,23 @@ fun HistoryScreen(navController: NavController) {
     val white = Color.White
     val brightBlue = Color(0xFF0D6EFD)
 
+    // variable sesion
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val clave = sessionManager.getUserKey()
+
     // Datos de ejemplo para la tabla
     val registros = listOf(
-        Registro("214890204", "Manuel Smith", "25/03/21", "10:00am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "25/03/21", "14:00pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "26/03/21", "09:45am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "26/03/21", "13:30pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "27/03/21", "10:15am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "27/03/21", "14:30pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "28/03/21", "09:50am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "28/03/21", "14:10pm", "Salida"),
-        Registro("214890204", "Manuel Smith", "29/03/21", "10:05am", "Entrada"),
-        Registro("214890204", "Manuel Smith", "29/03/21", "14:20pm", "Salida")
+        Registro("$clave", "Manuel Smith", "25/03/21", "10:00am", "Entrada"),
+        Registro("$clave", "Manuel Smith", "25/03/21", "14:00pm", "Salida"),
+        Registro("$clave", "Manuel Smith", "26/03/21", "09:45am", "Entrada"),
+        Registro("$clave", "Manuel Smith", "26/03/21", "13:30pm", "Salida"),
+        Registro("$clave", "Manuel Smith", "27/03/21", "10:15am", "Entrada"),
+        Registro("$clave", "Manuel Smith", "27/03/21", "14:30pm", "Salida"),
+        Registro("$clave", "Manuel Smith", "28/03/21", "09:50am", "Entrada"),
+        Registro("$clave", "Manuel Smith", "28/03/21", "14:10pm", "Salida"),
+        Registro("$clave", "Manuel Smith", "29/03/21", "10:05am", "Entrada"),
+        Registro("$clave", "Manuel Smith", "29/03/21", "14:20pm", "Salida")
     )
 
     // Estado para la paginación

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.SessionManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +38,11 @@ fun DigitalCredential(navController: NavController) {
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+
+    // variable session
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val clave = sessionManager.getUserKey()
 
     Scaffold(
         topBar = {
@@ -198,7 +205,7 @@ fun DigitalCredential(navController: NavController) {
 
                             // Número de identificación
                             Text(
-                                text = "21240551",
+                                text = "$clave",
                                 style = MaterialTheme.typography.titleMedium,
                                 color = white,
                                 textAlign = TextAlign.Center
@@ -224,7 +231,7 @@ fun DigitalCredential(navController: NavController) {
                                     )
 
                                     Text(
-                                        text = "21240551",
+                                        text = "$clave",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Color.Black,
                                         textAlign = TextAlign.Center
