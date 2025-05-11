@@ -20,13 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.SessionManager
 
 // Modelo de datos para las notificaciones
 data class Notificacion(
@@ -43,6 +47,11 @@ fun NotificationScreen(navController: NavController) {
     val darkBlue = Color(0xFF2D3748)
     val white = Color.White
     val lightGray = Color(0xFFE9ECEF)
+
+    val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val clave = sessionManager.getUserKey()
+    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
     // Datos de ejemplo para las notificaciones
     val notificaciones = listOf(
@@ -109,13 +118,24 @@ fun NotificationScreen(navController: NavController) {
 
                         // Iconos de usuario y menú
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.perfil),
-                                contentDescription = "Perfil",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
+                            if (clave != null) {
+                                AsyncImage(
+                                    model = "$url$clave.jpg",
+                                    contentDescription = "Foto de perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.perfil),
+                                    contentDescription = "Perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                         }
 
                         Box(

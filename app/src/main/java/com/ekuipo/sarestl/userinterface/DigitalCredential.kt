@@ -87,13 +87,24 @@ fun DigitalCredential(navController: NavController) {
 
                         // Iconos de usuario y menú
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.perfil),
-                                contentDescription = "Perfil",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
+                            if (clave != null) {
+                                AsyncImage(
+                                    model = "$url$clave.jpg",
+                                    contentDescription = "Foto de perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.perfil),
+                                    contentDescription = "Perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                         }
 
                         Box(

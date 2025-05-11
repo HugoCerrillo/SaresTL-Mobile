@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.SessionManager
 
@@ -54,6 +56,7 @@ fun HistoryScreen(navController: NavController) {
     val sessionManager = SessionManager(context)
     val clave = sessionManager.getUserKey()
 
+
     // Datos de ejemplo para la tabla
     val registros = listOf(
         Registro("$clave", "Manuel Smith", "25/03/21", "10:00am", "Entrada"),
@@ -79,6 +82,8 @@ fun HistoryScreen(navController: NavController) {
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+
+    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
     Scaffold(
         topBar = {
@@ -120,13 +125,24 @@ fun HistoryScreen(navController: NavController) {
 
                         // Iconos de usuario y menú
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.perfil),
-                                contentDescription = "Perfil",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
+                            if (clave != null) {
+                                AsyncImage(
+                                    model = "$url$clave.jpg",
+                                    contentDescription = "Foto de perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.perfil),
+                                    contentDescription = "Perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                         }
 
                         Box(
