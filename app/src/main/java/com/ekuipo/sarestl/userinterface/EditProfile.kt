@@ -2,11 +2,11 @@ package com.ekuipo.sarestl.userinterface
 
 import android.content.Context
 import android.net.Uri
-import android.os.Bundle
+//import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+//import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
+//import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,17 +38,23 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.remember
-import coil.compose.rememberAsyncImagePainter
+import coil.ImageLoader
+//import coil.compose.rememberAsyncImagePainter
 import com.ekuipo.sarestl.models.EditProfileRequest
-import com.ekuipo.sarestl.models.ResetPasswordResponse
+//import com.ekuipo.sarestl.models.ResetPasswordResponse
 import com.ekuipo.sarestl.models.SessionManager
 import com.ekuipo.sarestl.network.RetrofitClient
 import com.ekuipo.sarestl.network.subirImagen
-import dalvik.system.ZipPathValidator.Callback
+//import dalvik.system.ZipPathValidator.Callback
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Response
 import java.io.File
+import coil.compose.AsyncImage
+import coil.imageLoader
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import com.ekuipo.sarestl.models.EditProfileResponse
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +67,7 @@ fun EditProfilen(navController: NavController) {
     val gray = Color(0xFFADB5BD)
 
     // Estados para los campos del formulario
-    var correo by remember { mutableStateOf("usuario@tecnm.mx") }
+    //var correo by remember { mutableStateOf("usuario@tecnm.mx") }
     var contrasena by remember { mutableStateOf("") }
     var confirmarContrasena by remember { mutableStateOf("") }
 
@@ -72,10 +78,22 @@ fun EditProfilen(navController: NavController) {
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
     val clave = sessionManager.getUserKey()
+    var correo = sessionManager.getUserEmail();
+    var telefono by remember { mutableStateOf(sessionManager.getUserPhone() ?: "") }
+    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
     //para la fotito
     var imagenUri by remember { mutableStateOf<Uri?>(null) }
     val scope = rememberCoroutineScope()
+
+    var imageLoader = ImageLoader(context)
+
+    LaunchedEffect(Unit) {
+        // Limpiar caché de imágenes
+        imageLoader.memoryCache?.clear()  // Limpiar la memoria
+        imageLoader.diskCache?.clear()  // Limpiar el caché de disco
+    }
+
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -85,20 +103,31 @@ fun EditProfilen(navController: NavController) {
             scope.launch {
                 val archivo = crearArchivoTemporalConNombre(context, it, "$clave.jpg")
                 val subidaExitosa = subirImagen(archivo)
-                Toast.makeText(
-                    context,
-                    if (subidaExitosa) "✅ Imagen subida" else "❌ Falló la subida",
-                    Toast.LENGTH_SHORT
-                ).show()
+
+                if (subidaExitosa){
+                    android.app.AlertDialog.Builder(context)
+                        .setMessage("✅ Imagen subida correctamente.")
+                        .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                        .setPositiveButton("Aceptar") { dialog, _ ->
+                            navController.navigate("EditProfile")
+                            dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                        }
+                        .create()
+                        .show()
+                }else{
+                    android.app.AlertDialog.Builder(context)
+                        .setMessage("❌ Falló la subida, intentelo nuevamente mas tarde.")
+                        .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                        .setPositiveButton("Aceptar") { dialog, _ ->
+                            navController.navigate("EditProfile")
+                            dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                        }
+                        .create()
+                        .show()
+                }
             }
         }
     }
-
-    //para los datos de los campos de texto
-    val getDataAPI = getDataAPI(clave)
-    getDataAPI.callAPI()
-
-
 
     Scaffold(
         topBar = {
@@ -140,13 +169,33 @@ fun EditProfilen(navController: NavController) {
 
                         // Iconos de usuario y menú
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.perfil),
-                                contentDescription = "Perfil",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
+                            if (clave != null) {
+                                //imageLoader = ImageLoader(context)
+
+                                //imageLoader.memoryCache?.clear()  // Limpiar caché de memoria
+                                //imageLoader.diskCache?.clear()    // Limpiar caché de disco
+
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data("$url$clave.jpg")
+                                        .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                        .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                        .build(),
+                                    contentDescription = "Foto de perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.perfil),
+                                    contentDescription = "Perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                         }
 
                         Box(
@@ -179,7 +228,7 @@ fun EditProfilen(navController: NavController) {
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
-                                                "Cerrar Sesión" -> navController.navigate("LoginScreen")
+                                                "Cerrar Sesión" -> navController.navigate("login")
                                             }
                                         }
                                     )
@@ -259,26 +308,28 @@ fun EditProfilen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Correo electrónico",
+                        text = "Correo",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = darkBlue,
                         modifier = Modifier.width(160.dp)
                     )
 
-                    OutlinedTextField(
-                        value = correo,
-                        onValueChange = { correo = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(4.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.LightGray,
-                            focusedBorderColor = brightBlue,
-                            unfocusedContainerColor = white,
-                            focusedContainerColor = white
-                        ),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    Text (
+                        text = "$correo",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = darkBlue,
+                        //onValueChange = { correo = it },
+                        //modifier = Modifier.fillMaxWidth(),
+                        //shape = RoundedCornerShape(4.dp),
+                        //colors = OutlinedTextFieldDefaults.colors(
+                        //unfocusedBorderColor = Color.LightGray,
+                        //focusedBorderColor = brightBlue,
+                        //unfocusedContainerColor = white,
+                        //focusedContainerColor = white
+                        //),
+                        //singleLine = true,
+                        //keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                     )
                 }
 
@@ -346,6 +397,37 @@ fun EditProfilen(navController: NavController) {
                     )
                 }
 
+                // telefono
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Teléfono",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = darkBlue,
+                        modifier = Modifier.width(160.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = telefono,
+                        onValueChange = { telefono = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.LightGray,
+                            focusedBorderColor = brightBlue,
+                            unfocusedContainerColor = white,
+                            focusedContainerColor = white
+                        ),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    )
+                }
+
                 // Sección de fotografía
                 Row(
                     modifier = Modifier
@@ -371,11 +453,18 @@ fun EditProfilen(navController: NavController) {
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (imagenUri != null) {
-                            Image(
-                                painter = rememberAsyncImagePainter(imagenUri),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize()
+                        if (url != null) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data("$url$clave.jpg")
+                                    .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                    .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                    .build(),
+                                contentDescription = "Foto de perfil",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
                             )
                         } else {
                             Icon(
@@ -416,7 +505,63 @@ fun EditProfilen(navController: NavController) {
 
                     // Botón Guardar cambios
                     Button(
-                        onClick = { /* Guardar cambios y navegar */ },
+                        onClick = {
+                        /* Guardar cambios y navegar */
+                            if (contrasena.isNotEmpty() && confirmarContrasena.isNotEmpty() && telefono.isNotEmpty()){
+                                if (contrasena == confirmarContrasena){
+                                    val editProfileRequest = EditProfileRequest(clave, telefono, contrasena)
+                                    RetrofitClient.apiService.setEditProfile(editProfileRequest)
+                                        .enqueue(object: retrofit2.Callback<EditProfileResponse>{
+                                            override fun onResponse(
+                                                call: Call<EditProfileResponse>,
+                                                response: Response<EditProfileResponse>
+                                            ) {
+                                                if (response.isSuccessful && response.body()?.status == "success"){
+                                                    sessionManager.saveUserPhone(telefono)
+                                                    //todo esta very gus
+                                                    //mensaje de exito
+                                                    android.app.AlertDialog.Builder(context)
+                                                        .setMessage("Cambios realizados correctamente")
+                                                        .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                        .setPositiveButton("Aceptar") { dialog, _ ->
+                                                            navController.navigate("EditProfile")
+                                                            dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                        }
+                                                        .create()
+                                                        .show()
+                                                }else{
+                                                    android.app.AlertDialog.Builder(context)
+                                                        .setMessage("Ha ocurrido un error al cambiar los datos, intentelo nuevamente: " + response.body()?.status)
+                                                        .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                        .setPositiveButton("Aceptar") { dialog, _ ->
+                                                            navController.navigate("EditProfile")
+                                                            dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                        }
+                                                        .create()
+                                                        .show()
+                                                }
+                                            }
+
+                                            override fun onFailure(
+                                                call: Call<EditProfileResponse>,
+                                                t: Throwable
+                                            ) {
+                                                TODO("Not yet implemented")
+                                                android.app.AlertDialog.Builder(context)
+                                                    .setMessage("Error de conexión: " + t.toString())
+                                                    .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                                                    .setPositiveButton("Aceptar") { dialog, _ ->
+                                                        navController.navigate("EditProfile")
+                                                        dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                                                    }
+                                                    .create()
+                                                    .show()
+                                            }
+
+                                        })
+                                }
+                            }
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp),
@@ -458,94 +603,3 @@ fun crearArchivoTemporalConNombre(context: Context, uri: Uri, nombre: String): F
 
     return archivoTemporal
 }
-
-private class setDataAPI(val username: String, val phoneNumber: String, val password: String){
-
-    fun callAPI (){
-        //val editProfileRequest = EditProfileRequest(username)
-    }
-}
-
-
-private class getDataAPI(val username: String){
-    private var password: String = ""
-    private var phoneNumber: String = ""
-    private var nombre_foto: String = ""
-    private var tipo_foto: String = ""
-    private var ruta_foto: String = ""
-
-    fun callAPI(){
-        val editProfile_getRequest = EditProfile_getRequest(username)
-        RetrofitClient.apiService.getEditProfile(editProfile_getRequest)
-            .enqueue(object : retrofit2.Callback<EditProfile_getResponse> {
-                override fun onResponse(
-                    call: Call<EditProfile_getResponse>,
-                    response: Response<EditProfile_getResponse>
-                ) {
-                    //contenido
-                    if (response.isSuccessful && response.body()?.status == "success"){
-                        //contenido si todo este veri gus
-                        password = response.body()?.password ?: ""
-                        phoneNumber = response.body()?.phoneNumber?: ""
-                        nombre_foto = response.body()?.nombre_foto?: ""
-                        tipo_foto = response.body()?.tipo_foto?: ""
-                        ruta_foto = response.body()?.ruta_foto?: ""
-                        //guardamos tofdo el vlas variables globales
-
-                    }else{
-                        //no hacemos nada y queda como ""
-                        password = "Error"
-                        phoneNumber = "Error"
-                        nombre_foto = "Error"
-                        tipo_foto= "Error"
-                        ruta_foto = "Error"
-                    }
-                }
-
-                override fun onFailure(
-                    call: Call<EditProfile_getResponse>,
-                    t: Throwable
-                ){
-                    //contenido
-                    password = "Error"
-                    phoneNumber = "Error"
-                    nombre_foto = "Error"
-                    tipo_foto= "Error"
-                    ruta_foto = "Error"
-                }
-            })
-    }
-
-    fun getPassword(): String {
-        return password
-    }
-    fun getPhoneNumber (): String{
-        return phoneNumber
-    }
-    fun getNombre_foto():String{
-        return nombre_foto
-    }
-    fun getTipo_Foto ():String{
-        return tipo_foto
-    }
-    fun getRuta_Foto():String{
-        return ruta_foto
-    }
-
-
-}
-
-public data class EditProfile_getRequest(
-    val username: String,
-)
-
-public data class EditProfile_getResponse(
-    val status: String,
-    val message: String,
-    val clave: String,
-    val password: String,
-    val phoneNumber: String,
-    val nombre_foto: String,
-    val tipo_foto: String,
-    val ruta_foto: String,
-)

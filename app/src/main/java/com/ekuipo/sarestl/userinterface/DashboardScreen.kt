@@ -1,8 +1,6 @@
 package com.ekuipo.sarestl.userinterface
 
 import android.annotation.SuppressLint
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,6 +23,10 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.SessionManager
 import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 
 
 @SuppressLint("RememberReturnType")
@@ -38,7 +41,7 @@ fun DashboardScreen(navController: NavController) {
     val clave = remember { sessionManager.getUserKey() }
     val name = remember { sessionManager.getUserName() }
     val userType = remember { sessionManager.getUserRol() }
-    val isLogged = remember { sessionManager.getIsLogged() }
+
 
     // Definir los colores que coinciden con la interfaz web
     val lightBlue = Color(0xFF70A5F9)
@@ -47,7 +50,15 @@ fun DashboardScreen(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
 
-    Log.d("MyTag", "The value of isLogged is: $isLogged")
+    val url = "https://hugoc.pythonanywhere.com/profile_pics/"
+
+    var imageLoader = ImageLoader(context)
+
+    LaunchedEffect(Unit) {
+        // Limpiar caché de imágenes
+        imageLoader.memoryCache?.clear()  // Limpiar la memoria
+        imageLoader.diskCache?.clear()  // Limpiar el caché de disco
+    }
 
     Scaffold(
         topBar = {
@@ -89,13 +100,28 @@ fun DashboardScreen(navController: NavController) {
 
                         // Iconos de usuario y menú
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
-                            Image(
-                                painter = painterResource(id = R.drawable.perfil),
-                                contentDescription = "Perfil",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                            )
+                            if (clave != null) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(context)
+                                        .data("$url$clave.jpg")
+                                        .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                        .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                        .build(),
+                                    contentDescription = "Foto de perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Image(
+                                    painter = painterResource(id = R.drawable.perfil),
+                                    contentDescription = "Perfil",
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                         }
 
 
@@ -125,22 +151,11 @@ fun DashboardScreen(navController: NavController) {
                                             expanded = false
                                             when (opcion) {
                                                 "Pagina principal" -> navController.navigate("home")
-                                                "Notificaciones" ->{
-                                                    Log.d("DashboardScreen", "Se ha hecho clic en 'Cerrar Sesión'")
-                                                    navController.navigate("NotificationScreen")
-                                                }
+                                                "Notificaciones" -> navController.navigate("NotificationScreen")
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
-                                                "Cerrar Sesión" -> {
-                                                    Log.d("DashboardScreen", "Se ha hecho clic en 'Cerrar Sesión'") //
-                                                    sessionManager.clearSession()
-                                                    Log.d("SessionManager", "Sesión eliminada: ${sessionManager.getUserKey() == null}")
-                                                    Toast.makeText(context, "Sesión cerrada", Toast.LENGTH_SHORT).show()
-                                                    navController.navigate("login") {
-                                                        popUpTo(0) { inclusive = true }
-                                                    }
-                                                }
+                                                "Cerrar Sesión" -> navController.navigate("LoginScreen")
                                             }
                                         }
                                     )
@@ -191,13 +206,20 @@ fun DashboardScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.perfil),
-                    contentDescription = "Perfil",
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                )
+                if (clave != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data("$url$clave.jpg")
+                            .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                            .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                            .build(),
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
