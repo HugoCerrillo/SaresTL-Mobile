@@ -28,16 +28,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.HistoryRequest
+import com.ekuipo.sarestl.models.HistoryResponse
+import com.ekuipo.sarestl.models.Notificacion
+import com.ekuipo.sarestl.models.NotificationRequest
+import com.ekuipo.sarestl.models.NotificationResponse
+import com.ekuipo.sarestl.models.Registro
 import com.ekuipo.sarestl.models.SessionManager
+import com.ekuipo.sarestl.network.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-// Modelo de datos para las notificaciones
-data class Notificacion(
-    val tipo: String,
-    val fecha: String,
-    val hora: String
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,29 +64,72 @@ fun NotificationScreen(navController: NavController) {
     val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
     // Datos de ejemplo para las notificaciones
-    val notificaciones = listOf(
-        Notificacion("Entrada registrada", "25/03/21", "10:00am"),
-        Notificacion("Salida registrada", "25/03/21", "14:00pm"),
-        Notificacion("Entrada registrada", "26/03/21", "09:45am"),
-        Notificacion("Salida registrada", "26/03/21", "13:30pm"),
-        Notificacion("Entrada registrada", "27/03/21", "10:15am"),
-        Notificacion("Salida registrada", "27/03/21", "14:30pm"),
-        Notificacion("Entrada registrada", "28/03/21", "09:50am"),
-        Notificacion("Salida registrada", "28/03/21", "14:10pm"),
-        Notificacion("Entrada registrada", "29/03/21", "10:05am")
-    )
+    val notificaciones = remember { mutableStateOf<List<Notificacion>>(emptyList()) }
 
-    // Estado para la paginación
+// Estado para la paginación
     var currentPage by remember { mutableStateOf(1) }
     val totalPages = 4
     val itemsPerPage = 8
+
+// Acceder correctamente al tamaño de notificaciones
+    val notificacionesList = notificaciones.value
     val startIndex = (currentPage - 1) * itemsPerPage
-    val endIndex = minOf(startIndex + itemsPerPage, notificaciones.size)
-    val currentNotificaciones = notificaciones.subList(startIndex, endIndex)
+    val endIndex = minOf(startIndex + itemsPerPage, notificacionesList.size)
+
+// Obtener las notificaciones de la página actual
+    val currentNotificaciones = notificacionesList.subList(startIndex, endIndex)
+
+
+    LaunchedEffect(clave) {
+        val getNotificacion = NotificationRequest(clave)
+        RetrofitClient.apiService.getNotifications(getNotificacion)
+            .enqueue(object: Callback<NotificationResponse> {
+                override fun onResponse(
+                    call: Call<NotificationResponse>,
+                    response: Response<NotificationResponse>
+                ) {
+                    if (response.isSuccessful && response.body()?.status == "success"){
+                        notificaciones.value = (response.body()?.records ?: emptyList()) as List<Notificacion>
+                    }else{
+                        android.app.AlertDialog.Builder(context)
+                            .setMessage("Hubo un error al obtener las notificaciones")
+                            .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                            .setPositiveButton("Aceptar") { dialog, _ ->
+                                dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                            }
+                            .create()
+                            .show()
+                    }
+                }
+
+                override fun onFailure(call: Call<NotificationResponse>, t: Throwable) {
+                    TODO("Not yet implemented")
+                    android.app.AlertDialog.Builder(context)
+                        .setMessage("Error de conexion")
+                        .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                        .setPositiveButton("Aceptar") { dialog, _ ->
+                            dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                        }
+                        .create()
+                        .show()
+                }
+            })
+    }
+
+
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+
+    var imageLoader = ImageLoader(context)
+
+    LaunchedEffect(Unit) {
+        // Limpiar caché de imágenes
+        imageLoader.memoryCache?.clear()  // Limpiar la memoria
+        imageLoader.diskCache?.clear()  // Limpiar el caché de disco
+    }
+
 
     Scaffold(
         topBar = {
@@ -120,7 +173,11 @@ fun NotificationScreen(navController: NavController) {
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
                             if (clave != null) {
                                 AsyncImage(
-                                    model = "$url$clave.jpg",
+                                    model = ImageRequest.Builder(context)
+                                        .data("$url$clave.jpg")
+                                        .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                        .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                        .build(),
                                     contentDescription = "Foto de perfil",
                                     modifier = Modifier
                                         .size(36.dp)
@@ -212,8 +269,9 @@ fun NotificationScreen(navController: NavController) {
                         .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(currentNotificaciones) { notificacion ->
-                        NotificacionItem(notificacion)
+                    items(notificaciones.value) { Notificacion ->
+                        NotificacionItem(Notificacion)
+                        //Divider()
                     }
                 }
 
@@ -304,7 +362,7 @@ fun NotificacionItem(notificacion: Notificacion) {
         ) {
             // Tipo de notificación
             Text(
-                text = notificacion.tipo,
+                text = notificacion.mensaje,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = Color.Black
@@ -312,7 +370,7 @@ fun NotificacionItem(notificacion: Notificacion) {
 
             // Fecha y hora
             Text(
-                text = "${notificacion.fecha} - ${notificacion.hora}",
+                text = "${notificacion.fechaNotificacion} - ${formatTime(notificacion.horaNotificacion)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )

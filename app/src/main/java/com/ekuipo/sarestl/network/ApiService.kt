@@ -2,14 +2,16 @@ package com.ekuipo.sarestl.network
 
 import com.ekuipo.sarestl.models.EditProfileRequest
 import com.ekuipo.sarestl.models.EditProfileResponse
+import com.ekuipo.sarestl.models.HistoryRequest
+import com.ekuipo.sarestl.models.HistoryResponse
 import com.ekuipo.sarestl.models.LoginRequest
 import com.ekuipo.sarestl.models.LoginResponse
+import com.ekuipo.sarestl.models.NotificationRequest
+import com.ekuipo.sarestl.models.NotificationResponse
 import com.ekuipo.sarestl.models.RegisterRequest
 import com.ekuipo.sarestl.models.RegisterResponse
 import com.ekuipo.sarestl.models.ResetPasswordRequest
 import com.ekuipo.sarestl.models.ResetPasswordResponse
-import com.ekuipo.sarestl.userinterface.EditProfile_getRequest
-import com.ekuipo.sarestl.userinterface.EditProfile_getResponse
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -37,12 +39,18 @@ interface ApiService {
     @POST("/api/editProfile")
     fun setEditProfile (@Body editProfileRequest: EditProfileRequest): Call<EditProfileResponse>
 
-    @POST("/api/getProfile")
-    fun getEditProfile(@Body setEditProfileRequest: EditProfile_getRequest): Call<EditProfile_getResponse>
+    //@POST("/api/getProfile")
+    //fun getEditProfile(@Body setEditProfileRequest: EditProfile_getRequest): Call<EditProfile_getResponse>
 
     @Multipart
     @POST("/upload/")
     suspend fun subirImagen(@Part image: MultipartBody.Part): Response<ResponseBody>
+
+    @POST("/api/get_personal_registration")
+    fun get_personal_registration(@Body getPersonalRegistration: HistoryRequest): Call<HistoryResponse>
+
+    @POST("/api/getNotifications")
+    fun getNotifications(@Body getNotification: NotificationRequest): Call<NotificationResponse>
 }
 
 suspend fun subirImagen(file: File): Boolean {

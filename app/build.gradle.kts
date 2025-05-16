@@ -46,6 +46,7 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.0") // Asegúrate de que esté presente OkHttp
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation ("com.google.zxing:core:3.4.1")
 
 
     implementation(libs.androidx.core.ktx)

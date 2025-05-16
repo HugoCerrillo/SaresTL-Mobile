@@ -23,7 +23,10 @@ import androidx.navigation.NavController
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.SessionManager
 import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 
 
 @SuppressLint("RememberReturnType")
@@ -48,6 +51,14 @@ fun DashboardScreen(navController: NavController) {
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
 
     val url = "https://hugoc.pythonanywhere.com/profile_pics/"
+
+    var imageLoader = ImageLoader(context)
+
+    LaunchedEffect(Unit) {
+        // Limpiar caché de imágenes
+        imageLoader.memoryCache?.clear()  // Limpiar la memoria
+        imageLoader.diskCache?.clear()  // Limpiar el caché de disco
+    }
 
     Scaffold(
         topBar = {
@@ -91,7 +102,11 @@ fun DashboardScreen(navController: NavController) {
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
                             if (clave != null) {
                                 AsyncImage(
-                                    model = "$url$clave.jpg",
+                                    model = ImageRequest.Builder(context)
+                                        .data("$url$clave.jpg")
+                                        .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                        .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                        .build(),
                                     contentDescription = "Foto de perfil",
                                     modifier = Modifier
                                         .size(36.dp)
@@ -193,7 +208,11 @@ fun DashboardScreen(navController: NavController) {
 
                 if (clave != null) {
                     AsyncImage(
-                        model = "$url$clave.jpg",
+                        model = ImageRequest.Builder(context)
+                            .data("$url$clave.jpg")
+                            .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                            .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                            .build(),
                         contentDescription = "Foto de perfil",
                         modifier = Modifier
                             .size(100.dp)

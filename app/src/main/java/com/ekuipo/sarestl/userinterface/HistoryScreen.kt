@@ -1,17 +1,20 @@
 package com.ekuipo.sarestl.userinterface
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
+import android.os.Environment
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -21,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -28,19 +32,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.ekuipo.sarestl.R
+import com.ekuipo.sarestl.models.HistoryRequest
+import com.ekuipo.sarestl.models.HistoryResponse
+import com.ekuipo.sarestl.models.Registro
 import com.ekuipo.sarestl.models.SessionManager
-
-// Modelo de datos para los registros
-data class Registro(
-    val clave: String,
-    val nombre: String,
-    val fecha: String,
-    val hora: String,
-    val tipo: String
-)
+import com.ekuipo.sarestl.network.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,33 +69,75 @@ fun HistoryScreen(navController: NavController) {
     val clave = sessionManager.getUserKey()
 
 
-    // Datos de ejemplo para la tabla
-    val registros = listOf(
-        Registro("$clave", "Manuel Smith", "25/03/21", "10:00am", "Entrada"),
-        Registro("$clave", "Manuel Smith", "25/03/21", "14:00pm", "Salida"),
-        Registro("$clave", "Manuel Smith", "26/03/21", "09:45am", "Entrada"),
-        Registro("$clave", "Manuel Smith", "26/03/21", "13:30pm", "Salida"),
-        Registro("$clave", "Manuel Smith", "27/03/21", "10:15am", "Entrada"),
-        Registro("$clave", "Manuel Smith", "27/03/21", "14:30pm", "Salida"),
-        Registro("$clave", "Manuel Smith", "28/03/21", "09:50am", "Entrada"),
-        Registro("$clave", "Manuel Smith", "28/03/21", "14:10pm", "Salida"),
-        Registro("$clave", "Manuel Smith", "29/03/21", "10:05am", "Entrada"),
-        Registro("$clave", "Manuel Smith", "29/03/21", "14:20pm", "Salida")
-    )
+    val registros = remember { mutableStateOf<List<Registro>>(emptyList()) }
 
-    // Estado para la paginación
     var currentPage by remember { mutableStateOf(1) }
-    val totalPages = 4
     val itemsPerPage = 8
+    val totalPages = (registros.value.size + itemsPerPage - 1) / itemsPerPage
+
+    val registroList = registros.value
     val startIndex = (currentPage - 1) * itemsPerPage
-    val endIndex = minOf(startIndex + itemsPerPage, registros.size)
-    val currentRegistros = registros.subList(startIndex, endIndex)
+    val endIndex = minOf(startIndex + itemsPerPage, registroList.size)
+
+    val currentRegistros = if (registroList.isNotEmpty() && startIndex < registroList.size)
+        registroList.subList(startIndex, endIndex)
+    else
+        emptyList()
+
+    LaunchedEffect(clave) {
+        val getPersonalRegistration = HistoryRequest(clave)
+        RetrofitClient.apiService.get_personal_registration(getPersonalRegistration)
+            .enqueue(object: Callback<HistoryResponse>{
+                override fun onResponse(
+                    call: Call<HistoryResponse>,
+                    response: Response<HistoryResponse>
+                ) {
+                    if (response.isSuccessful && response.body()?.status == "success"){
+                        registros.value = (response.body()?.records ?: emptyList()) as List<Registro>
+                    }else{
+                        android.app.AlertDialog.Builder(context)
+                            .setMessage("Hubo un error al traer los registros")
+                            .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                            .setPositiveButton("Aceptar") { dialog, _ ->
+                                dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                            }
+                            .create()
+                            .show()
+                    }
+                }
+
+                override fun onFailure(call: Call<HistoryResponse>, t: Throwable) {
+                    TODO("Not yet implemented")
+                    android.app.AlertDialog.Builder(context)
+                        .setMessage("Error de conexion")
+                        .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
+                        .setPositiveButton("Aceptar") { dialog, _ ->
+                            dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
+                        }
+                        .create()
+                        .show()
+                }
+
+            })
+    }
+
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
     val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
 
     val url = "https://hugoc.pythonanywhere.com/profile_pics/"
+
+    var imageLoader = ImageLoader(context)
+
+    LaunchedEffect(Unit) {
+        // Limpiar caché de imágenes
+        imageLoader.memoryCache?.clear()  // Limpiar la memoria
+        imageLoader.diskCache?.clear()  // Limpiar el caché de disco
+    }
+
+
+
 
     Scaffold(
         topBar = {
@@ -127,7 +181,11 @@ fun HistoryScreen(navController: NavController) {
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
                             if (clave != null) {
                                 AsyncImage(
-                                    model = "$url$clave.jpg",
+                                    model = ImageRequest.Builder(context)
+                                        .data("$url$clave.jpg")
+                                        .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                        .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                        .build(),
                                     contentDescription = "Foto de perfil",
                                     modifier = Modifier
                                         .size(36.dp)
@@ -259,9 +317,9 @@ fun HistoryScreen(navController: NavController) {
 
                         // Filas de datos
                         LazyColumn {
-                            items(currentRegistros) { registro ->
-                                RegistroRow(registro)
-                                Divider(color = Color.LightGray, thickness = 0.5.dp)
+                            items(registros.value) { Registro ->
+                                RegistroRow(Registro)
+                                Divider()
                             }
                         }
                     }
@@ -311,7 +369,9 @@ fun HistoryScreen(navController: NavController) {
 
                 // Botón Exportar
                 Button(
-                    onClick = { /* Sin funcionalidad */ },
+                    onClick = { /* Sin funcionalidad */
+                        createPdfWithTable (registros.value, context)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
@@ -389,10 +449,171 @@ fun RegistroRow(registro: Registro) {
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                text = registro.hora,
+                text = formatTime(registro.hora),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
         }
     }
+}
+
+fun formatTime(seconds: String?): String {
+    // Verificamos si la entrada es válida
+    if (seconds.isNullOrEmpty()) return "00:00:00"  // Si es nulo o vacío, devolvemos una hora predeterminada.
+
+    return try {
+        // Convertimos el string a Double (ya que tiene un punto decimal)
+        val doubleValue = seconds.toDouble()
+
+        // Convertimos los segundos a milisegundos
+        val date = Date((doubleValue * 1000).toLong())  // Multiplicamos por 1000 y lo convertimos a Long
+
+        // Usamos un formato para mostrar la hora en HH:mm:ss
+        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        dateFormat.format(date)  // Devuelve la hora en formato HH:mm:ss
+    } catch (e: NumberFormatException) {
+        // En caso de error de conversión (si el string no es un número válido)
+        "00:00:00"
+    }
+}
+fun createPdfWithTable(registros: List<Registro>, context: Context) {
+    // Crear un nuevo documento PDF
+    val pdfDocument = PdfDocument()
+
+    // Definir la página con orientación horizontal (landscape)
+    val pageInfo = PdfDocument.PageInfo.Builder(842, 595, 1).create() // Tamaño A4 en formato horizontal
+    val page = pdfDocument.startPage(pageInfo)
+    val canvas = page.canvas
+    val paint = Paint()
+
+    // Cargar imágenes para la cabecera (ajusta el path según la ubicación)
+    val logoSares = BitmapFactory.decodeResource(context.resources, R.drawable.sares)  // Logo de Sares
+    val logoSep = BitmapFactory.decodeResource(context.resources, R.drawable.sep)      // Logo SEP
+    val logoTecnm = BitmapFactory.decodeResource(context.resources, R.drawable.tecnm)  // Logo Tecnológico
+    val logoTec = BitmapFactory.decodeResource(context.resources, R.drawable.tec)      // Logo Tec
+
+    // Reducir el tamaño de los logos para la cabecera
+    val logoSize = 80 // Tamaño reducido de los logos (un poco más grande que antes)
+
+    // Escalar las imágenes para ajustarlas al tamaño especificado
+    val scaledLogoSares = Bitmap.createScaledBitmap(logoSares, logoSize, logoSize, false)
+    val scaledLogoSep = Bitmap.createScaledBitmap(logoSep, 120, logoSize, false)
+    val scaledLogoTecnm = Bitmap.createScaledBitmap(logoTecnm, 120, logoSize, false)
+    val scaledLogoTec = Bitmap.createScaledBitmap(logoTec, logoSize, logoSize, false)
+
+    // Establecer el color del texto y tamaño
+    paint.color = Color.Black.toArgb()
+    paint.textSize = 14f
+
+    // Dibujar los logos en la cabecera (alineados de forma más espaciosa)
+    canvas.drawBitmap(scaledLogoSares, 50f, 30f, paint)
+    canvas.drawBitmap(scaledLogoSep, 150f, 30f, paint)
+    canvas.drawBitmap(scaledLogoTecnm, 290f, 30f, paint)
+    canvas.drawBitmap(scaledLogoTec, 440f, 30f, paint)
+
+    // Espacio entre los logos y el eslogan
+    val spaceAfterLogos = 30f // Ajusta este valor para el espacio deseado entre los logos y el eslogan
+
+    // Eslogan debajo de los logos
+    paint.textSize = 18f
+    paint.color = Color.Blue.toArgb()
+    canvas.drawText("¡SaresTL, Construyendo un acceso seguro!", 50f, 120f + spaceAfterLogos, paint)
+
+    // Establecer formato de tabla
+    paint.textSize = 12f
+    val columnWidthClave = 100f // Ancho de la columna "Clave"
+    val columnWidthNombre = 180f // Ancho de la columna "Nombre"
+    val columnWidthFecha = 120f // Ancho de la columna "Fecha"
+    val columnWidthHora = 120f // Ancho de la columna "Hora"
+    val columnWidthTipo = 100f // Ancho de la columna "Tipo"
+    val columnWidthTipoUsuario = 120f // Ancho de la columna "Tipo Usuario"
+    var yPosition = 150f + spaceAfterLogos // Posición inicial de la primera fila (con espacio añadido)
+
+    // Dibujar cabecera de la tabla
+    paint.color = Color.Black.toArgb()
+    canvas.drawText("Clave", 50f, yPosition, paint)
+    canvas.drawText("Nombre", 50f + columnWidthClave, yPosition, paint)
+    canvas.drawText("Fecha", 50f + columnWidthClave + columnWidthNombre, yPosition, paint)
+    canvas.drawText("Hora", 50f + columnWidthClave + columnWidthNombre + columnWidthFecha, yPosition, paint)
+    canvas.drawText("Tipo", 50f + columnWidthClave + columnWidthNombre + columnWidthFecha + columnWidthHora, yPosition, paint)
+    canvas.drawText("Tipo Usuario", 50f + columnWidthClave + columnWidthNombre + columnWidthFecha + columnWidthHora + columnWidthTipo, yPosition, paint)
+    yPosition += 20f // Separación entre la cabecera y los registros
+
+    // Dibujar los registros
+    for (registro in registros) {
+        canvas.drawText(registro.clave, 50f, yPosition, paint)
+
+        // Si el nombre es demasiado largo, se divide en varias líneas
+        val nameLines = splitTextToFit(registro.nombre, columnWidthNombre, paint, canvas)
+        var currentYPosition = yPosition
+        for (line in nameLines) {
+            canvas.drawText(line, 50f + columnWidthClave, currentYPosition, paint)
+            currentYPosition += 20f
+        }
+
+        canvas.drawText(registro.fecha, 50f + columnWidthClave + columnWidthNombre, currentYPosition, paint)
+        canvas.drawText(formatTime(registro.hora), 50f + columnWidthClave + columnWidthNombre + columnWidthFecha, currentYPosition, paint)
+        canvas.drawText(registro.tipo, 50f + columnWidthClave + columnWidthNombre + columnWidthFecha + columnWidthHora, currentYPosition, paint)
+        canvas.drawText(registro.tipoUsuario, 50f + columnWidthClave + columnWidthNombre + columnWidthFecha + columnWidthHora + columnWidthTipo, currentYPosition, paint)
+
+        yPosition = currentYPosition + 20f // Ajustamos la posición para el siguiente registro
+
+        if (yPosition > 700) {
+            // Si se alcanza el límite de la página, crear una nueva página
+            pdfDocument.finishPage(page)
+            val newPage = pdfDocument.startPage(pageInfo)
+            canvas.drawText("Continuación...", 50f, 50f, paint) // Puedes personalizar este texto
+            yPosition = 100f // Reseteamos la posición Y para la nueva página
+        }
+    }
+
+    // Finalizar la página
+    pdfDocument.finishPage(page)
+
+    // Guardar el archivo PDF
+    try {
+        val filePath = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "registros_con_imagenes_horizontal.pdf")
+        val fileOutputStream = FileOutputStream(filePath)
+        pdfDocument.writeTo(fileOutputStream)
+        pdfDocument.close()
+
+        // Abrir el archivo generado con un Intent
+        val uri = FileProvider.getUriForFile(context, "com.tuapp.provider", filePath)
+        val openIntent = Intent(Intent.ACTION_VIEW)
+        openIntent.setDataAndType(uri, "application/pdf")
+        openIntent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+        openIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        context.startActivity(openIntent)
+
+        // Notificar al usuario que el archivo se ha generado
+        Toast.makeText(context, "PDF generado exitosamente", Toast.LENGTH_SHORT).show()
+
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+}
+
+// Función para dividir el texto en varias líneas si excede el ancho de la columna
+fun splitTextToFit(text: String, maxWidth: Float, paint: Paint, canvas: android.graphics.Canvas): List<String> {
+    val lines = mutableListOf<String>()
+    var currentLine = ""
+    val words = text.split(" ")
+
+    for (word in words) {
+        val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
+        val testWidth = paint.measureText(testLine)
+
+        if (testWidth < maxWidth) {
+            currentLine = testLine
+        } else {
+            lines.add(currentLine)
+            currentLine = word
+        }
+    }
+
+    if (currentLine.isNotEmpty()) {
+        lines.add(currentLine)
+    }
+
+    return lines
 }

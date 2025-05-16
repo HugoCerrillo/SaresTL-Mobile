@@ -1,32 +1,62 @@
 package com.ekuipo.sarestl.userinterface
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.ekuipo.sarestl.R
 import com.ekuipo.sarestl.models.SessionManager
-import coil.compose.AsyncImage
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.common.BitMatrix
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +76,16 @@ fun DigitalCredential(navController: NavController) {
     val clave = sessionManager.getUserKey()
     val name = remember { sessionManager.getUserName() }
     val url = "https://hugoc.pythonanywhere.com/profile_pics/"
+
+    var imageLoader = ImageLoader(context)
+
+    LaunchedEffect(Unit) {
+        // Limpiar caché de imágenes
+        imageLoader.memoryCache?.clear()  // Limpiar la memoria
+        imageLoader.diskCache?.clear()  // Limpiar el caché de disco
+    }
+    val barcodeBitmap = generateBarcode(clave)
+    val bitmapPainter: Painter = remember { BitmapPainter(barcodeBitmap.asImageBitmap()) }
 
     Scaffold(
         topBar = {
@@ -89,7 +129,11 @@ fun DigitalCredential(navController: NavController) {
                         IconButton(onClick = { /* Sin funcionalidad */ }) {
                             if (clave != null) {
                                 AsyncImage(
-                                    model = "$url$clave.jpg",
+                                    model = ImageRequest.Builder(context)
+                                        .data("$url$clave.jpg")
+                                        .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                        .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                        .build(),
                                     contentDescription = "Foto de perfil",
                                     modifier = Modifier
                                         .size(36.dp)
@@ -198,7 +242,11 @@ fun DigitalCredential(navController: NavController) {
                             ) {
                                 if (url != null) {
                                     AsyncImage(
-                                        model = "$url$clave.jpg",
+                                        model = ImageRequest.Builder(context)
+                                            .data("$url$clave.jpg")
+                                            .diskCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché
+                                            .memoryCachePolicy(CachePolicy.DISABLED) // Deshabilitar caché en memoria
+                                            .build(),
                                         contentDescription = "Foto de perfil",
                                         modifier = Modifier
                                             .fillMaxSize()
@@ -248,7 +296,7 @@ fun DigitalCredential(navController: NavController) {
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Image(
-                                        painter = painterResource(id = R.drawable.barcode),
+                                        painter = bitmapPainter,
                                         contentDescription = "Código de barras",
                                         modifier = Modifier
                                             .height(60.dp)
@@ -279,4 +327,26 @@ fun DigitalCredential(navController: NavController) {
             }
         }
     }
+}
+
+fun generateBarcode(clave: String): Bitmap {
+    val bitMatrix: BitMatrix = MultiFormatWriter().encode(
+        clave, // El valor numérico que deseas codificar (tu variable "clave")
+        BarcodeFormat.CODE_128, // Tipo de código de barras (en este caso, CODE_128)
+        600, // Ancho de la imagen
+        300 // Alto de la imagen
+    )
+
+    val width = bitMatrix.width
+    val height = bitMatrix.height
+    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+
+    // Coloca los píxeles del código de barras en el bitmap
+    for (x in 0 until width) {
+        for (y in 0 until height) {
+            bmp.setPixel(x, y, if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
+        }
+    }
+
+    return bmp
 }
