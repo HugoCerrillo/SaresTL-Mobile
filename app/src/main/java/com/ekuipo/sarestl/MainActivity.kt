@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("login") {
                         if(isLogged){
-
+                            //Aquí no hacemos nada xd
                         }else{
                             LoginScreen(navController)
                         }

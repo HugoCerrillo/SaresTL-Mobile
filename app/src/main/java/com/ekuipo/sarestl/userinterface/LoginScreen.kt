@@ -2,6 +2,7 @@ package com.ekuipo.sarestl.userinterface
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -291,6 +292,9 @@ fun LoginScreen(navController: NavController) {
 
 
                                                     if (clave != null) {
+                                                        sessionManager.saveIsLogged(true)
+                                                        val isLogged = sessionManager.getIsLogged()
+                                                        Log.d("MyTag", "The value of isLogged is: $isLogged")
                                                         sessionManager.saveUserKey(clave)
                                                         sessionManager.saveUserName(name)
                                                         sessionManager.saveUserRol(userType)
@@ -298,7 +302,9 @@ fun LoginScreen(navController: NavController) {
                                                         sessionManager.saveUserPhone(telefono)
                                                         sessionManager.saveUserImage(imagen)
 
-                                                        navController.navigate("home")
+                                                        navController.navigate("home"){
+                                                            popUpTo("login") { inclusive = true }
+                                                        }
                                                     }
                                                 } else {
                                                     Toast.makeText(

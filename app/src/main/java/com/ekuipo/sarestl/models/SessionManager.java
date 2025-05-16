@@ -6,16 +6,26 @@ import android.content.SharedPreferences;
 public class SessionManager {
 
     private SharedPreferences prefs;
+    private static final String IS_LOGGED_KEY = "is_logged";
+
     private static final String USER_KEY = "clave";
     private static final String NAME = "name";
     private static final String ROL = "userType";
     private static final String EMAIL = "correo";
     private static final String PHONE = "telefono";
-
+    
     private static final String IMAGE = "imagen";
 
     public SessionManager(Context context) {
         prefs = context.getSharedPreferences("user_session", Context.MODE_PRIVATE);
+    }
+
+    public void saveIsLogged(boolean value) {
+        prefs.edit().putBoolean(IS_LOGGED_KEY, value).apply();
+    }
+
+    public boolean getIsLogged() {
+        return prefs.getBoolean(IS_LOGGED_KEY, false);
     }
 
     public void saveUserKey(String clave) {
