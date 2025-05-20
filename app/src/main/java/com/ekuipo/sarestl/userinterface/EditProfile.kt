@@ -73,7 +73,7 @@ fun EditProfilen(navController: NavController) {
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
-    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesión")
 
     val context = LocalContext.current
     val sessionManager = SessionManager(context)
@@ -228,6 +228,7 @@ fun EditProfilen(navController: NavController) {
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
+                                                "prueba" -> navController.navigate("login")
                                                 "Cerrar Sesión" -> navController.navigate("login")
                                             }
                                         }

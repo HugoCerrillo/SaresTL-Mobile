@@ -68,7 +68,7 @@ fun DigitalCredential(navController: NavController) {
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
-    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesión")
 
     // variable session
     val context = LocalContext.current
@@ -181,7 +181,7 @@ fun DigitalCredential(navController: NavController) {
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
-                                                "Cerrar Sesión" -> navController.navigate("LoginScreen")
+                                                "Cerrar Sesión" -> navController.navigate("login")
                                             }
                                         }
                                     )
