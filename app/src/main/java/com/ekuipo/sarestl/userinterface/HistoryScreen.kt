@@ -124,7 +124,7 @@ fun HistoryScreen(navController: NavController) {
 
     // Estado para el menú desplegable
     var expanded by remember { mutableStateOf(false) }
-    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesion")
+    val opciones = listOf("Pagina principal", "Notificaciones", "Credencial Digital", "Historial de Registros", "Mi Perfil", "Cerrar Sesión")
 
     val url = "https://hugoc.pythonanywhere.com/profile_pics/"
 
@@ -233,7 +233,7 @@ fun HistoryScreen(navController: NavController) {
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
-                                                "Cerrar Sesión" -> navController.navigate("LoginScreen")
+                                                "Cerrar Sesión" -> navController.navigate("login")
                                             }
                                         }
                                     )
