@@ -504,7 +504,7 @@ fun LoginScreen(navController: NavController) {
                 val context = LocalContext.current
 
                 // URL a abrir
-                val citasUrl = "https://hugocerrillo.github.io/SaresTL/html/Modulo-OlvidarContrasena.html"
+                val citasUrl = "https://forms.gle/7QDq8WDrrysN1udM7"
 
                 // Estado para controlar si ya se ha abierto el navegador
                 var navegadorAbierto by remember { mutableStateOf(false) }

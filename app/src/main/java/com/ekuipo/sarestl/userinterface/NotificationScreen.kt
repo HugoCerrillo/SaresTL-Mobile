@@ -92,7 +92,7 @@ fun NotificationScreen(navController: NavController) {
                         notificaciones.value = (response.body()?.records ?: emptyList()) as List<Notificacion>
                     }else{
                         android.app.AlertDialog.Builder(context)
-                            .setMessage("Hubo un error al obtener las notificaciones")
+                            .setMessage("No se encontraron registros de notificaciones")
                             .setCancelable(false)  // No se puede cerrar tocando fuera del diálogo
                             .setPositiveButton("Aceptar") { dialog, _ ->
                                 dialog.dismiss()  // Cerrar el diálogo después de presionar "Sí"
