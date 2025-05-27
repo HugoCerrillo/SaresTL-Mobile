@@ -229,7 +229,12 @@ fun EditProfilen(navController: NavController) {
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
                                                 "prueba" -> navController.navigate("login")
-                                                "Cerrar Sesión" -> navController.navigate("login")
+                                                "Cerrar Sesión" -> {
+                                                    sessionManager.clearSession()
+                                                    navController.navigate("login"){
+                                                        popUpTo(0) {inclusive = true}
+                                                    }
+                                                }
                                             }
                                         }
                                     )

@@ -155,7 +155,12 @@ fun DashboardScreen(navController: NavController) {
                                                 "Credencial Digital" -> navController.navigate("DigitalCredential")
                                                 "Historial de Registros" -> navController.navigate("HistoryScreen")
                                                 "Mi Perfil" -> navController.navigate("EditProfile")
-                                                "Cerrar Sesión" -> navController.navigate("login")
+                                                "Cerrar Sesión" -> {
+                                                    sessionManager.clearSession()
+                                                    navController.navigate("login"){
+                                                        popUpTo(0) {inclusive = true}
+                                                    }
+                                                }
                                             }
                                         }
                                     )
