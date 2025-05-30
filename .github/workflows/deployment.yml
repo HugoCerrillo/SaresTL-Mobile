@@ -1,0 +1,32 @@
+name: Test API in PythonAnywhere
+
+on:
+  push:
+    branches:
+      - master
+      - test-branch
+      - hugo-branch
+      - joseph-branch
+      - goretti-branch
+  pull_request:
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Test /api/login
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/login \
+          -H "Content-Type: application/json" \
+          -d '{"username":"PRUEBA123", "password":"Contrasena123"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        status=$(jq -r '.status' response.json)
+        clave=$(jq -r '.clave' respon
