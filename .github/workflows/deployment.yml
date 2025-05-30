@@ -109,3 +109,45 @@ jobs:
         fi
 
         echo "Prueba de verifyEmail exitosa"
+
+    # Nuevo paso para probar /api/get_personal_registration
+    - name: Test /api/get_personal_registration
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/get_personal_registration \
+          -H "Content-Type: application/json" \
+          -d '{"clave":"010"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        status=$(jq -r '.status' response.json)
+
+        if [ "$status" == "error" ]; then
+          message=$(jq -r '.message' response.json)
+          if [ "$message" == "No se encontraron registros" ]; then
+            echo "No se encontraron registros, esto es esperado"
+          else
+            echo "Error: El mensaje no es 'No se encontraron registros'"
+            cat response.json
+            exit 1
+          fi
+        elif [ "$status" == "success" ]; then
+          records=$(jq -r '.records' response.json)
+
+          # Verificar que los registros no estén vacíos
+          if [ -z "$records" ]; then
+            echo "Error: No se encontraron registros en 'records'"
+            cat response.json
+            exit 1
+          else
+            echo "Prueba de get_personal_registration exitosa"
+          fi
+        else
+          echo "Error: El status no es 'success' ni 'error'"
+          cat response.json
+          exit 1
+        fi
