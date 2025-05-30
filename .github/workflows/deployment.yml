@@ -29,4 +29,18 @@ jobs:
 
         # Verificar el contenido de la respuesta JSON
         status=$(jq -r '.status' response.json)
-        clave=$(jq -r '.clave' respon
+        clave=$(jq -r '.clave' response.json)
+
+        if [ "$status" != "success" ]; then
+          echo "Error: El status no es 'success'"
+          cat response.json
+          exit 1
+        fi
+
+        if [ -z "$clave" ]; then
+          echo "Error: No se encontró el valor de 'clave' en la respuesta"
+          cat response.json
+          exit 1
+        fi
+
+        echo "Prueba de login exitosa"
