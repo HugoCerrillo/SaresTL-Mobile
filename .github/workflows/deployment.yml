@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Test /api/login
       run: |
-        curl -X POST https://hugoc.pythonanywhere.com/api/login \
+        curl -X POST https://HugoC.pythonanywhere.com/api/login \
         -H "Content-Type: application/json" \
         -d '{"username":"PRUEBA123", "password":"Contrasena123"}' \
         --fail
