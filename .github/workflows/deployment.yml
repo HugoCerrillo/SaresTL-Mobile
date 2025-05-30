@@ -45,7 +45,7 @@ jobs:
 
         echo "Prueba de login exitosa"
 
-    # Nuevo paso para probar /api/usertype
+    # Test para el endpoint /api/usertype
     - name: Test /api/usertype
       run: |
         response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/usertype \
@@ -78,3 +78,34 @@ jobs:
 
         echo "Prueba de usertype exitosa"
 
+    # Nuevo paso para probar /api/verifyEmail
+    - name: Test /api/verifyEmail
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/verifyEmail \
+          -H "Content-Type: application/json" \
+          -d '{"email":"pruebas@gmail.com"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        status=$(jq -r '.status' response.json)
+        user_mail=$(jq -r '.userMail' response.json)
+        user_id=$(jq -r '.userId' response.json)
+
+        if [ "$status" != "success" ]; then
+          echo "Error: El status no es 'success'"
+          cat response.json
+          exit 1
+        fi
+
+        if [ -z "$user_mail" ] || [ -z "$user_id" ]; then
+          echo "Error: Los valores de 'userMail' o 'userId' están vacíos"
+          cat response.json
+          exit 1
+        fi
+
+        echo "Prueba de verifyEmail exitosa"
