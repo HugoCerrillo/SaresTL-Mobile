@@ -19,7 +19,7 @@ jobs:
       run: |
         response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/login \
           -H "Content-Type: application/json" \
-          -d '{"username":"005", "password":"1234"}')
+          -d '{"username":"010", "password":"1234"}')
 
         if [ "$response" -ne 200 ]; then
           echo "Error: La respuesta HTTP no es 200, código de estado: $response"
@@ -44,3 +44,37 @@ jobs:
         fi
 
         echo "Prueba de login exitosa"
+
+    # Nuevo paso para probar /api/usertype
+    - name: Test /api/usertype
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/usertype \
+          -H "Content-Type: application/json" \
+          -d '{"user":"010"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        status=$(jq -r '.status' response.json)
+        user_name=$(jq -r '.userName' response.json)
+        user_role=$(jq -r '.userRole' response.json)
+        user_type_inst=$(jq -r '.userTypeInst' response.json)
+
+        if [ "$status" != "success" ]; then
+          echo "Error: El status no es 'success'"
+          cat response.json
+          exit 1
+        fi
+
+        if [ -z "$user_name" ] || [ -z "$user_role" ] || [ -z "$user_type_inst" ]; then
+          echo "Error: Los valores de 'userName', 'userRole' o 'userTypeInst' están vacíos"
+          cat response.json
+          exit 1
+        fi
+
+        echo "Prueba de usertype exitosa"
+
