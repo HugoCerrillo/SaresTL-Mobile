@@ -81,7 +81,7 @@ jobs:
 
         echo "Prueba de usertype exitosa"
 
-    # Nuevo paso para probar /api/verifyEmail
+    # Test para el endpoint /api/verifyEmail
     - name: Test /api/verifyEmail
       run: |
         response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/verifyEmail \
@@ -116,7 +116,7 @@ jobs:
 
         echo "Prueba de verifyEmail exitosa"
 
-    # Nuevo paso para probar /api/get_personal_registration
+    # Test para el endpoint /api/get_personal_registration
     - name: Test /api/get_personal_registration
       run: |
         response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/get_personal_registration \
@@ -151,6 +151,48 @@ jobs:
             exit 1
           else
             echo "Prueba de get_personal_registration exitosa"
+          fi
+        else
+          echo "Error: El status no es 'success' ni 'error'"
+          cat response.json
+          exit 1
+        fi
+
+    # Nuevo paso para probar /api/getNotifications
+    - name: Test /api/getNotifications
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/getNotifications \
+          -H "Content-Type: application/json" \
+          -d '{"clave":"010"}')
+
+        if [ "$response" -ne 200 ] && [ "$response" -ne 401 ]; then
+          echo "Error: La respuesta HTTP no es ni 200 ni 401, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        status=$(jq -r '.status' response.json)
+
+        if [ "$status" == "error" ]; then
+          message=$(jq -r '.message' response.json)
+          if [ "$message" == "No se encontraron registros" ]; then
+            echo "No se encontraron notificaciones, esto es esperado"
+          else
+            echo "Error: El mensaje no es 'No se encontraron registros'"
+            cat response.json
+            exit 1
+          fi
+        elif [ "$status" == "success" ]; then
+          notifications=$(jq -r '.records' response.json)
+
+          # Verificar que las notificaciones no estén vacías
+          if [ -z "$notifications" ]; then
+            echo "Error: No se encontraron notificaciones en 'records'"
+            cat response.json
+            exit 1
+          else
+            echo "Prueba de getNotifications exitosa"
           fi
         else
           echo "Error: El status no es 'success' ni 'error'"
