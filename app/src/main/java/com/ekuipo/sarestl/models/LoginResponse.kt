@@ -8,5 +8,5 @@ data class LoginResponse(
     val userType: String,
     val correo: String,
     val telefono: String,
-    val imagen: String
+    val imagen: String,
 )
