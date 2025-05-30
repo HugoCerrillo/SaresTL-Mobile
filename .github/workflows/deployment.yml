@@ -3,7 +3,7 @@ name: Test API in PythonAnywhere
 on:
   push:
     branches:
-      - main  # o la rama de tu app móvil
+      - test-branch  # o la rama de tu app móvil
   pull_request:
 
 jobs:
