@@ -19,7 +19,7 @@ jobs:
       run: |
         response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/login \
           -H "Content-Type: application/json" \
-          -d '{"username":"PRUEBA123", "password":"Contrasena123"}')
+          -d '{"username":"005", "password":"1234"}')
 
         if [ "$response" -ne 200 ]; then
           echo "Error: La respuesta HTTP no es 200, código de estado: $response"
