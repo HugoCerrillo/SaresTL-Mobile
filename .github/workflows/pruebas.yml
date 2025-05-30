@@ -1,0 +1,88 @@
+name: Test API in PythonAnywhere
+
+on:
+  push:
+    branches:
+      - test-branch
+  pull_request:
+
+jobs:
+  test-api:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Test /api/login
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/login \
+          -H "Content-Type: application/json" \
+          -d '{"username":"PRUEBA123", "password":"Contrasena123"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        status=$(jq -r '.status' response.json)
+        clave=$(jq -r '.clave' response.json)
+
+        if [ "$status" != "success" ]; then
+          echo "Error: El status no es 'success'"
+          cat response.json
+          exit 1
+        fi
+
+        if [ -z "$clave" ]; then
+          echo "Error: No se encontró el valor de 'clave' en la respuesta"
+          cat response.json
+          exit 1
+        fi
+
+        echo "Prueba de login exitosa"
+
+    - name: Test /api/usertype
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/usertype \
+          -H "Content-Type: application/json" \
+          -d '{"user":"PRUEBA123"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        user_type=$(jq -r '.user_type' response.json)
+
+        if [ -z "$user_type" ]; then
+          echo "Error: No se encontró el valor de 'user_type' en la respuesta"
+          cat response.json
+          exit 1
+        fi
+
+        echo "Prueba de usertype exitosa"
+
+    - name: Test /api/verifyEmail
+      run: |
+        response=$(curl -s -w "%{http_code}" -o response.json -X POST https://hugoc.pythonanywhere.com/api/verifyEmail \
+          -H "Content-Type: application/json" \
+          -d '{"email":"test@example.com"}')
+
+        if [ "$response" -ne 200 ]; then
+          echo "Error: La respuesta HTTP no es 200, código de estado: $response"
+          cat response.json
+          exit 1
+        fi
+
+        # Verificar el contenido de la respuesta JSON
+        verification_status=$(jq -r '.verification_status' response.json)
+
+        if [ -z "$verification_status" ]; then
+          echo "Error: No se encontró el valor de 'verification_status' en la respuesta"
+          cat response.json
+          exit 1
+        fi
+
+        echo "Prueba de verifyEmail exitosa"
