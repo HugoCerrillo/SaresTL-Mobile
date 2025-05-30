@@ -53,6 +53,8 @@ interface ApiService {
     fun getNotifications(@Body getNotification: NotificationRequest): Call<NotificationResponse>
 }
 
+
+
 suspend fun subirImagen(file: File): Boolean {
     val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
     val multipartBody = MultipartBody.Part.createFormData("image", file.name, requestBody)
