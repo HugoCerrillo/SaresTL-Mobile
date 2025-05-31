@@ -426,19 +426,19 @@ fun LoginScreen(navController: NavController) {
                                             // Cargar el video de YouTube
                                             loadData(
                                                 """
-                                <html>
-                                    <body style="margin:0;padding:0">
-                                        <iframe 
-                                            width="100%" 
-                                            height="100%" 
-                                            src="https://www.youtube.com/embed/$videoId" 
-                                            frameborder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                            allowfullscreen>
-                                        </iframe>
-                                    </body>
-                                </html>
-                                """,
+    <html>
+        <body style="margin:0;padding:0">
+            <iframe 
+                width="100%" 
+                height="100%" 
+                src="https://www.youtube.com/embed/-So6gp3Yl7s" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </body>
+    </html>
+    """,
                                                 "text/html",
                                                 "utf-8"
                                             )
@@ -459,23 +459,6 @@ fun LoginScreen(navController: NavController) {
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
-
-                            // Enlaces adicionales
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                TextButton(
-                                    onClick = { /* Acción para descargar PDF */ }
-                                ) {
-                                    Text(
-                                        text = "Descargar manual en PDF",
-                                        color = linkBlue,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            }
                         }
                     }
 
