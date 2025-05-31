@@ -59,24 +59,10 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.ui.test.junit4.android)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    testImplementation("junit:junit:4.13.2")
-    testImplementation ("org.mockito:mockito-core:4.0.0")
-    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
-    testImplementation ("org.mockito:mockito-core:4.8.0")
-    testImplementation ("org.mockito:mockito-inline:4.8.0")
-
-    testImplementation ("org.mockito:mockito-junit-jupiter:4.8.0")
-    androidTestImplementation ("androidx.compose.ui:ui-test-junit4:1.4.0")
-    testImplementation ("androidx.compose.ui:ui-test:1.4.0")
-
 
 
 
